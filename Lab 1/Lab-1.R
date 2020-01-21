@@ -2,9 +2,9 @@
 library(tidyverse)
 library(gapminder)
 
-# Exersize 1 
+# Exercise 1 
 
-# Assign mpg to a variable - hi there 
+# Assign mpg to a variable  
 data1 = mpg
 
 # Create a plot comparing disp and hwy
@@ -21,16 +21,21 @@ v2 <- ggplot(data = data1, mapping = aes(x = class, y = drv)) +
 v3 <- ggplot(data = data1, mapping = aes(x = displ, y = hwy, color = class)) + 
   geom_point()
 
-# Exersize 2
+# Exercise 2
+
+# Load Bank Data
 bankData <- read.csv("bank.csv")
 
-# Subset data to only 
+# Subset data to only include the month and subscription success
 month_y <- as_tibble(bankData[,c("month","y")])
 
+
+# Creates a new data frame giving for each month the number of calls per month, number of subscriptions, number of rejections, and the success rate  
 successRateFrame <- month_y %>%
   group_by(month) %>% 
   summarize(Count = n(), Y = sum(y == "yes"), N = sum(y == "no"), Success_Rate = sum(y == "yes")/n()) 
 
+# Creates a bar graph that maps the success rate for each month. In addition, it includes the number of people who were contacted above 
 successRatePlot <- ggplot(data = successRateFrame, mapping = aes(x= reorder(month, -Success_Rate) , y = Success_Rate)) + 
   geom_bar(stat = "identity", color = "purple", fill = "purple") + 
   labs(x = "Month", y = "Subscription Success Rate",title = "Subscription Success Rate by Month") + 
