@@ -2,7 +2,7 @@
 library(tidyverse)
 library(gapminder)
 
-# Exersize 1 
+# Exersize 1 - hello there 
 
 # Assign mpg to a variable
 data1 = mpg
