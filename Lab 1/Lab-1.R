@@ -46,6 +46,30 @@ successRatePlot <- ggplot(data = successRateFrame, mapping = aes(x= reorder(mont
     hjust=0.5, vjust=-1) + 
   ylim(0,.5)
 
+plot(successRatePlot)
+
+# Subset data to only include the job and subscription success
+job_y <- as_tibble(bankData[,c("job","y")])
+
+
+# Creates a new data frame giving for each job a client might have and counts the number of people in the data set who have a job category, number of subscriptions, number of rejections, and the success rate  
+successRateFrame <- job_y %>%
+  group_by(job) %>% 
+  summarize(Count = n(), Y = sum(y == "yes"), N = sum(y == "no"), Success_Rate = sum(y == "yes")/n()) 
+
+# Creates a bar graph that maps the success rate for each job category In addition, it includes the number of people who were contacted above 
+jobSuccessRatePlot <- ggplot(data = successRateFrame, mapping = aes(x= reorder(job, -Success_Rate) , y = Success_Rate)) + 
+  geom_bar(stat = "identity", color = "red", fill = "red") + 
+  labs(x = "Job", y = "Subscription Success Rate",title = "Subscription Success Rate by Job Category") + 
+  theme(plot.title = element_text(hjust = .5, size = 18), axis.text.x = element_text(angle=90, hjust=1)) + 
+  geom_text(
+    aes(label=round(Count)), 
+    size = 5, fontface = 2, color = 'black', 
+    hjust=0.5, vjust=-1) + 
+  ylim(0,.5)
+
+
+plot(jobSuccessRatePlot)
 
 
 
