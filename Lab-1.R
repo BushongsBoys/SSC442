@@ -4,7 +4,7 @@ library(gapminder)
 
 # Exersize 1 
 
-# Assign mpg to a variable- hellow
+# Assign mpg to a variable
 data1 = mpg
 
 # Create a plot comparing disp and hwy
