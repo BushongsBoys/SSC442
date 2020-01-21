@@ -97,4 +97,31 @@ successRatePlot <- ggplot(data = successRateFrame, mapping = aes(x= reorder(mont
 plot(successRatePlot)
 ```
 
+The next graph compares job type to Subscription success rate in an attempt to discover which people should be marketed to most heavily. 
 
+
+```{r, echo=FALSE}
+# Subset data to only include the job and subscription success
+job_y <- as_tibble(bankData[,c("job","y")])
+
+
+# Creates a new data frame giving for each job a client might have and counts the number of people in the data set who have a job category, number of subscriptions, number of rejections, and the success rate  
+successRateFrame <- job_y %>%
+  group_by(job) %>% 
+  summarize(Count = n(), Y = sum(y == "yes"), N = sum(y == "no"), Success_Rate = sum(y == "yes")/n()) 
+
+# Creates a bar graph that maps the success rate for each job category In addition, it includes the number of people who were contacted above 
+jobSuccessRatePlot <- ggplot(data = successRateFrame, mapping = aes(x= reorder(job, -Success_Rate) , y = Success_Rate)) + 
+  geom_bar(stat = "identity", color = "red", fill = "red") + 
+  labs(x = "Job Category", y = "Subscription Success Rate",title = "Subscription Success Rate by Job Category") + 
+  theme(plot.title = element_text(hjust = .5, size = 18), axis.text.x = element_text(angle=90, hjust=1)) + 
+  geom_text(
+    aes(label=round(Count)), 
+    size = 5, fontface = 2, color = 'black', 
+    hjust=0.5, vjust=-1) + 
+  ylim(0,.5)
+
+plot(jobSuccessRatePlot)
+```
+
+As you can see from the above chart, retirees and students are both excellent markets for long-term savings account campaigns. Generally, it appears white-collar workers are also more responsive as compared to blue-collar workers. We recommend targeting retirees, students, and white-collar workers most heavily to maximize the impact of the marketing campaign.
