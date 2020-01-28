@@ -1,0 +1,31 @@
+Format of file is name: description, range of values
+Lot Frontage: Length of the side of the lot facing the road in feet, 0-313 but could take any reasonable value above 0.
+Lot Area: Land in sqft, reasonable positive values. 
+OverallQual: Quality of home, 1-10
+OverallCond: condition of home, 1-10
+YearBuilt: year built, 1872-2010 (1850-Present is probably a reasonable expected range)
+YearRemodAdd: year of most recent remodel, same as yearbuilt if no remodel. 1950-2010 (1850-present could be reasonable)
+BsmtUnfSF: unfinished basement squarefootage, 0-reasonable sizes
+TotalBsmtSF: total basement square footage,0-reasonable sizes
+X1stFlrSF: sqaure footage of the first floor, reasonable positive values
+X2ndFlrSF: square footage of the second floor,0-reasonable sizes
+GrLivArea: total above ground living area, reasonable positive values
+BsmtFullBath: Full baths in basement, 0-reasonable amount of bathrooms 
+BsmtHalfBath: half baths in basement, 0-reasonable amount of bathrooms 
+FullBath: Full baths aboveground, 0-reasonable amount of bathrooms 
+HalfBath: Half baths aboveground, 0-reasonable amount of bathrooms 
+BedroomAbvGr: above ground bedrooms, 0-reasonable amount of bedrooms(* is max in data)
+KitchenAbvGr: amount of kitchens above ground, 0-reasonable amount of kitchens(3 is max in data set)
+TotRmsAbvGrd: total amount of rooms above ground, 1(2 is min in data set)-amt rooms(14 is max in data)
+Fireplaces: amount of fireplaces, 0-reasonable count(3 is max in data)
+GarageYrBlt: year garage was built, 1900 - 2010 (1850-present could be reasonable)
+GarageCars: amount of cars garage can hold(0 if no garage), 0-4 in data but some homes could have 20-30 car capacities.
+GarageArea: square footage of garage, 0-reasonable garage size(1418 is max in data)
+WoodDeckSF: square footage of wood deck, 0-reasonable deck size(857 is max in data)
+OpenPorchSF: square footage of open porch, 0-reasonable size(547 is max in data)
+EnclosedPorch: square footage of enclosed porch, 0-reasonable size(552 is max in data)
+ScreenPorch: square footage of screened in porch, 0-reasonable size(480 is max in data)
+PoolArea: square footage of pool area, 0-reasonable pool size(738 is max in data could easily be larger)
+MoSold: month sold, 1-12
+YrSold: year sold, data is from 2006-2010 could hypothetically take any year value you had home transaction data for.
+SalePrice: sale price of home in dollars, Data is from 34900 - 755000, could take any reasonable positive home price.
