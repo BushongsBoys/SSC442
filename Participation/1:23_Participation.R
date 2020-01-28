@@ -35,6 +35,7 @@ full4 <- lm(balance ~ age + job + marital + education, data = bankSubset)
 anova(null4,full4)
 # p value is low --> reject null hypthesis --> include eduaction into model
 
+
 # Testing Default
 null5 <- lm(balance ~ age + job + marital + education, data = bankSubset)
 full5 <- lm(balance ~ age + job + marital + education + default, data = bankSubset)
