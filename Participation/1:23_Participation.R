@@ -96,6 +96,7 @@ fit_balance_model<- lm(balance ~ age + job + marital + education + default + loa
 
 # However, I believe that month is insignificant in the actual interpretation of this data, therefore I would omit it from the 
 # variables in the regression and use this model instead
+# The final model includes the variables age, job, marital, education, default, and loan to predict balance
 final_balance_model <- lm(balance ~ age + job + marital + education + default + loan , data = bankSubset)
 
 
