@@ -1,4 +1,6 @@
+
 Format of file is name: description, range of values
+Id : unique id for house 1-infinity(1500 in data)
 Lot Frontage: Length of the side of the lot facing the road in feet, 0-313 but could take any reasonable value above 0.
 Lot Area: Land in sqft, reasonable positive values. 
 OverallQual: Quality of home, 1-10
