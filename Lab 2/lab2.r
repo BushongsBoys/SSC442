@@ -1,12 +1,27 @@
+# Lab 1 
+
+# Load data from github
 ameslist <- read.table("https://msudataanalytics.github.io/SSC442/Labs/data/ames.csv",
                        header = TRUE,
                        sep = ",")
+
+# Remove any non-integer variables
 amesnums <- Filter(is.numeric, ameslist)
 library(dplyr)
+
+# Create a vector of the names of variables we do not have a reasonable intuition for
 drops <- c("MSSubClass", "MasVnrArea", "BsmtFinSF1", "BsmtFinSF2", "BsmntUnfSF", "LowQualFinSF", "X3SsnPorch", "MiscVal")
+
+# Remove those variavles from the dataset
 amesnums <-amesnums[ , !(names(amesnums) %in% drops)]
+
+# Assign the variable Ames to list amesnum
 Ames  <- amesnums
+
+# Save file as an RData and csv file
 save(Ames, file = "Ames.RData")
+write.csv(Ames, 'Ames.csv')
+
 range(Ames$GrLivArea, na.rm = TRUE)
 
 subAmes <- select(Ames, "SalePrice", "YrSold", "GrLivArea", "TotalBsmtSF", "OverallCond","OverallQual","LotArea","YearBuilt","YearRemodAdd","BedroomAbvGr","TotRmsAbvGrd","GarageCars")
