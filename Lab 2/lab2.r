@@ -23,6 +23,6 @@ attach(Ames)
 lm.fit = lm(SalePrice ~ GrLivArea)
 plot(subAmes$GrLivArea, subAmes$SalePrice) + abline(lm.fit)
 resid <- lm.fit$residual
-unlist(Ames[match(max(resid),resid),])
+unlist(Ames[match(max(resid), resid),])
 
 #This find the row that is the largest outlier in our model.
