@@ -1,0 +1,63 @@
+---
+title: "Lab2"
+author: "Michael St Jean"
+date: "1/29/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+# Load data from github
+ameslist <- read.table("https://msudataanalytics.github.io/SSC442/Labs/data/ames.csv",
+                       header = TRUE,
+                       sep = ",")
+
+# Remove any non-integer variables
+amesnums <- Filter(is.numeric, ameslist)
+library(dplyr)
+
+# Create a vector of the names of variables we do not have a reasonable intuition for
+drops <- c("MSSubClass", "MasVnrArea", "BsmtFinSF1", "BsmtFinSF2", "BsmntUnfSF", "LowQualFinSF", "X3SsnPorch", "MiscVal")
+
+# Remove those variavles from the dataset
+amesnums <-amesnums[ , !(names(amesnums) %in% drops)]
+
+# Assign the variable Ames to list amesnum
+Ames  <- amesnums
+
+subAmes <- select(Ames, "SalePrice", "YrSold", "GrLivArea", "TotalBsmtSF", "OverallCond","OverallQual","LotArea","YearBuilt","YearRemodAdd","BedroomAbvGr","TotRmsAbvGrd","GarageCars")
+```
+
+## Exersize 1
+
+Below is a visualization of our scatterplot matrix between 12 variables we believed to be associated with Sale Price. It is a little difficult to read in a pdf format, so if you are interested in getting a better view of each plot, run our rscript in github. The variables from left to right are sale price, year sold, total above ground living, total basement square footing, overall condition, overall quality, lot area, year built, year remodelled, bedrooms above ground, total rooms above ground, and garage size
+
+```{r, echo = FALSE}
+pairs(subAmes)
+
+```
+
+In addition to these plots, we've included a matrix of correlation between the variables. The results can be seen below
+
+```{r, echo = FALSE}
+cor(subAmes)
+
+```
+
+As we can see above the correlation factor relating each variable to one another is displayed, however, we are most concerned with the first column relating each variable to sale price. The variables with strong correlative relationships are above ground living area and overall quality. Variable with moderate correlative relationshios include total basement square footage, year built, year remodelled, total rooms above ground, garage size. The ones that didn't quite match our beliefs with weaker relationships were year sold, overall condition, lot area, and bedrooms above ground. Most of the correlations matched our earlier beliefs, all the variables that imply a bigger house are strongly correlated with an increase in sale price,newer and higher quality houses also sold for more, we expected condition to be positively correlated with sale price, we am unsure why this has a negative correlation, perhaps because condition is negatively correlated with basement size and YearBuilt. We expected Yrsold to be positively correlated with the saleprice but considering the timing of the dataset around the recession a negative correlation makes sense. 
+
+
+Now lets look at the relationship between sale price and above ground living space. Below us a scatterplot and simple linear regression model plotted alongside it.  
+
+```{r, echo=FALSE}
+options(scipen = 5)
+attach(Ames)
+lm.fit = lm(SalePrice ~ GrLivArea)
+plot(subAmes$GrLivArea, subAmes$SalePrice, main = "Sale Price vs Above Ground Living Space", ylab = "Sale Price", xlab = "Above Ground Living Space") + abline(lm.fit)
+
+```
+
+As we can see there are a few outliers to this notibly the point 
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
