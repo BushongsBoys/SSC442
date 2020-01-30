@@ -39,7 +39,8 @@ cor(subAmes)
 
 attach(Ames)
 lm.fit = lm(SalePrice ~ GrLivArea)
-plot(subAmes$GrLivArea, subAmes$SalePrice) + abline(lm.fit)
+options(scipen = 5)
+plot(subAmes$GrLivArea, subAmes$SalePrice, main = "Sale Price vs Above Ground Living Space", ylab = "Sale Price", xlab = "Above Ground Living Space") + abline(lm.fit)
 resid <- lm.fit$residual
 unlist(Ames[match(max(resid), resid),])
 
