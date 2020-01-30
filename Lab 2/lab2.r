@@ -89,5 +89,14 @@ transformer_model2 <- lm(SalePrice ~ log(GrLivArea), data = Ames)
 summary(transformer_model2)
 #allows you to see the effects of a percent change in GrLivArea
 
-transformer_model3 <- lm(SalePrice ~ GrLivArea + LotArea + LotArea*LotArea, data = Ames)
-summary(transformer_model2)
+transformer_model3 <- lm(SalePrice ~ GrLivArea + I(GrLivArea^2), data = Ames)
+summary(transformer_model3)
+#as above ground living area increases it becomes less significant
+
+transformer_model4 <- lm(SalePrice ~ LotArea + I(LotArea^2), data = Ames)
+summary(transformer_model4)
+#Same for lot area
+
+transformer_model5 <- lm(SalePrice ~ sqrt(LotArea), data = Ames)
+summary(transformer_model5)
+#Taking the sqrt of lot area increases the statistical significance but I am still not sure why you would want to do it. 
