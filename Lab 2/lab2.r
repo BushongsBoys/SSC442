@@ -1,5 +1,8 @@
 # Lab 1 
 
+
+# Exersize 1
+
 # Load data from github
 ameslist <- read.table("https://msudataanalytics.github.io/SSC442/Labs/data/ames.csv",
                        header = TRUE,
@@ -41,3 +44,23 @@ resid <- lm.fit$residual
 unlist(Ames[match(max(resid), resid),])
 
 #This find the row that is the largest outlier in our model.
+
+# Exersize 2
+
+# From notes 
+
+
+#1 
+GarageTemp = model.matrix( ~ ameslist$GarageType - 1)
+ameslist <- cbind(ameslist, GarageTemp)
+
+
+#2 
+
+# Create linear regression model with all variables in Ames as predictor variables
+sp_model <- lm(SalePrice ~ ., data = Ames)
+summary(sp_model)
+
+
+
+
