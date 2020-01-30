@@ -1,6 +1,6 @@
 ---
-title: "Lab2"
-author: "Michael St Jean"
+title: "Lab 2"
+author: "Group 17"
 date: "1/29/2020"
 output: pdf_document
 ---
@@ -8,6 +8,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
+library(fastDummies)
 # Load data from github
 ameslist <- read.table("https://msudataanalytics.github.io/SSC442/Labs/data/ames.csv",
                        header = TRUE,
@@ -15,7 +16,7 @@ ameslist <- read.table("https://msudataanalytics.github.io/SSC442/Labs/data/ames
 
 # Remove any non-integer variables
 amesnums <- Filter(is.numeric, ameslist)
-library(dplyr)
+
 
 # Create a vector of the names of variables we do not have a reasonable intuition for
 drops <- c("MSSubClass", "MasVnrArea", "BsmtFinSF1", "BsmtFinSF2", "BsmntUnfSF", "LowQualFinSF", "X3SsnPorch", "MiscVal")
@@ -58,6 +59,84 @@ plot(subAmes$GrLivArea, subAmes$SalePrice, main = "Sale Price vs Above Ground Li
 
 ```
 
-As we can see there are a few outliers to this notibly the point 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+As we can see there are a few outliers to this scatterplot. After calculating the absolute value of the residuals, there is one point in particular (the one on the bottom right corner of the plot) that is the other outlier. This point has an above ground living space of 5642 and a sale price of 16000. According to the model we would predict that with this GrLivArea of about 60000 for a residual of -462998.5. To see why this sale price was so low, we compared the other characteristic to the mean of each column. Factors that could have pulled the sale price down was the small lot area, however all the other characteristics of the line are in line or even better than the mean. For this reason, we can assume that this was some kind of favor for a family member or friend, or there could be some other type of payment not related to sale price associated with the house. 
+
+## Exersize 2 
+
+After creating a regression model with sale price as the response and Garage Outside being the predictor we get the following: 
+
+```{r, echo=TRUE}
+ameslist <- fastDummies::dummy_cols(ameslist, select_columns = c("GarageType"))
+ameslist$GarageOutside <- ifelse(ameslist$GarageType_Detchd == 1 | ameslist$GarageType_CarPort == 1, 1, 0)
+lmGarage.fit = lm(SalePrice ~ ameslist$GarageOutside)
+summary(lmGarage.fit)
+```
+
+After running this we see GarageOutside has a coeficient of -72859. This means that the model predicts if a house has a garage that is not connected to the house in some way, it will devalue the sale price by 72859. 
+
+
+Lets now explore a regression model with more predictors.The predictors contain all variables defined buy our Ames text file. 
+
+```{r, echo=TRUE}
+sp_model <- lm(SalePrice ~ ., data = Ames)
+summary(sp_model)
+```
+
+If you look at the output above, there are a few insights we can make. The first is that under the column each predictor has a linear relationship given the others stay constant. For example for Year Built we can interpret that given every other predictor stays constant, a one year increase in the year it was built will result in a 356 increase in the value of its sale price. The predictors that appear to have a statistically significant relationship to the response are those with low p-values and stars next to it. For example lot area, overall quality, bedrooms above ground, and many others are all statistically significant.
+
+Lets now take a look at the diagnostic plots of the regression
+
+```{r, fig.height= 4.4, echo=FALSE}
+plot(sp_model)
+```
+
+Lets take a look at the residual vs fitted graph first. As we can see, it is a relatively straight line with equally spread out residuals. This is a good thing as it reflects that there are no non-linear relationships. However, if we take a closer look, there is a slight parabolic shape which could reflect a slight non-linear relationship. In addition, as sale price gets larger, we notice that the data begins to have larger residuals and more outliers. 
+
+Skipping the next two graphs we come to the Residual vs Leverage graph. This graph tells us if there are any outliers that are influencial to the regression line. The dotted lines represent Cook's distance and if dotted lines lay inside of them, it means that they are influencial in the regression model. As we can see, point 1183 and 1299 do just this. 
+
+Finally, we played around with the model to try to make better fit to the data by using interactions and transformation of predictor variables. The code exploring this is put below. 
+
+```{r, echo=TRUE}
+#4
+inter_model1 <- lm(SalePrice ~ OverallQual+ GrLivArea + OverallQual*GrLivArea, data=Ames)
+summary(inter_model1)
+#statistically significant interaction between quality and above ground living area
+inter_model2 <- lm(SalePrice ~ GrLivArea + OverallQual + YearBuilt+ YearRemodAdd + YearBuilt*YearRemodAdd, data=Ames)
+summary(inter_model2)
+#no statistically significant interaction between yearbuilt and year remodeled
+inter_model3 <- lm(SalePrice ~ GrLivArea + OverallQual + LotArea + OverallQual*LotArea, data=Ames)
+summary(inter_model3)
+#interestingly not a significant interaction between lot area and quality
+inter_model4 <- lm(SalePrice ~ GrLivArea + OverallQual + LotArea + LotFrontage +  LotFrontage*LotArea, data=Ames)
+summary(inter_model4)
+#statistically significant but small interaction between lot area and lot frontage.
+#it may make sense to include the 2 significant interactions in the final model
+
+#5
+transformer_model1 <- lm(log(SalePrice) ~ ., data = Ames)
+summary(transformer_model1)
+#using log of sale price allows us to see percent change effects of the variables
+
+transformer_model2 <- lm(SalePrice ~ log(GrLivArea), data = Ames)
+summary(transformer_model2)
+#allows you to see the effects of a percent change in GrLivArea
+
+transformer_model3 <- lm(SalePrice ~ GrLivArea + I(GrLivArea^2), data = Ames)
+summary(transformer_model3)
+#as above ground living area increases it becomes less significant
+
+transformer_model4 <- lm(SalePrice ~ LotArea + I(LotArea^2), data = Ames)
+summary(transformer_model4)
+#Same for lot area
+
+transformer_model5 <- lm(SalePrice ~ sqrt(LotArea), data = Ames)
+summary(transformer_model5)
+#Taking the sqrt of lot area increases the statistical significance but I am still not sure why you would want to do it. 
+
+```
+
+
+
+
+
