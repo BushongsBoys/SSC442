@@ -13,7 +13,7 @@ rmse = function(actual, predicted) {
 }
 
 
-# Function that assigns a number ot model complexity --> based on number of predictors in the model
+# Function that assigns a number ot model complexity -> based on number of predictors in the model
 get_complexity = function(model) {
   length(coef(model)) - 1
 }
