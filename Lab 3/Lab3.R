@@ -37,7 +37,7 @@ nullModel <- lm(SalePrice ~ 1, data = ames_t)
 fullModel <- lm(SalePrice ~ ., data = ames_t)
 
 # Detects the variable to add to the null model that results in the lowest RSS 
-step(nullModel, direction = "forward", scope = formula(fullModel))
+#step(nullModel, direction = "forward", scope = formula(fullModel))
 
 # Models based on step fucntion up to complexity 15 in a list format 
 models <- list(model1 <- lm(SalePrice ~ Neighborhood, data = ames_t),
@@ -67,11 +67,55 @@ modelCompPlot <- ggplot(data = modelCompData, mapping = aes(x= Complexity, y = R
   labs(title = "RMSE vs Model Complexity") + 
   theme(plot.title = element_text(hjust = .5, size = 18)) 
 
+#excercize 2 
+set.seed(96)
+num_obs = nrow(ames_t)
 
+train_index = sample(num_obs, size = trunc(.9 * num_obs))
+train_data = ames_t[train_index, ]
+test_data = ames_t[-train_index, ]
 
+get_rmse = function(model, data, response) {
+  rmse(actual = subset(data, select = response, drop = TRUE),
+       predicted = predict(model, data))
+}
+#models2
+models2 <- list(model1 <- lm(SalePrice ~ Neighborhood, data = train_data),
+               model2 <- lm(SalePrice ~ Neighborhood + GrLivArea, data = train_data),
+               model3 <- lm(SalePrice ~ Neighborhood + GrLivArea + KitchenQual, data = train_data),
+               model4 <- lm(SalePrice ~ Neighborhood + GrLivArea + KitchenQual + BsmtExposure, data = train_data),
+               model5 <- lm(SalePrice ~ Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl, data = train_data),
+               model6 <- lm(SalePrice ~ Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model7 <- lm(SalePrice ~ BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model8 <- lm(SalePrice ~ Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model9 <- lm(SalePrice ~ BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model10 <- lm(SalePrice ~ BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model11 <- lm(SalePrice ~ YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model12 <- lm(SalePrice ~ ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model13 <- lm(SalePrice ~ Functional + ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model14 <- lm(SalePrice ~ LotArea + Functional + ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model15 <- lm(SalePrice ~ YearRemodAdd + LotArea + Functional + ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data))
 
+train_rmse = sapply(models2, get_rmse, data = train_data, response = "SalePrice")
+test_rmse = sapply(models2, get_rmse, data = test_data, response = "SalePrice")
+model_complexity = sapply(models2, get_complexity)
+plot(model_complexity, train_rmse, type = "b",
+     ylim = c(min(c(train_rmse, test_rmse)) - 0.02,
+              max(c(train_rmse, test_rmse)) + 0.02),
+     col = "dodgerblue",
+     xlab = "Model Size",
+     ylab = "RMSE")
+lines(model_complexity, test_rmse, type = "b", col = "darkorange")
+min(test_rmse)
+#excercize 2 
+set.seed(9)
+num_obs = nrow(ames_t)
 
-
-
-
-
+train_index = sample(num_obs, size = trunc(.5 * num_obs))
+train_data = ames_t[train_index, ]
+test_data = ames_t[-train_index, ]
+#right now best is 36065
+best_model <- 0
+best_model <- lm(SalePrice ~  GrLivArea + KitchenQual + LotArea + LotFrontage + LotArea*LotFrontage + TotalBsmtSF + YearBuilt + YearRemodAdd, data = train_data)
+get_rmse(best_model, train_data, 'SalePrice')
+get_rmse(best_model, test_data, 'SalePrice')
