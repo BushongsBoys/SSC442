@@ -61,6 +61,7 @@ modelCompData <- data.frame(
   "Complexity" = complexities <- sapply(models, get_complexity),
   "RMSE" = modrmse <- sapply(models, function(x){rmse(ames_t$SalePrice, predict(x, ames_t))}))
 
+# Create plot comparing RMSE to Complexity
 modelCompPlot <- ggplot(data = modelCompData, mapping = aes(x= Complexity, y = RMSE)) + 
   geom_line() + 
   labs(title = "RMSE vs Model Complexity") + 
