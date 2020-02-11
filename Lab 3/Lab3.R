@@ -67,7 +67,11 @@ modelCompPlot <- ggplot(data = modelCompData, mapping = aes(x= Complexity, y = R
   labs(title = "RMSE vs Model Complexity") + 
   theme(plot.title = element_text(hjust = .5, size = 18)) 
 
-#excercize 2 
+
+##################################
+
+# Excercize 2 
+
 set.seed(96)
 num_obs = nrow(ames_t)
 
@@ -107,6 +111,8 @@ plot(model_complexity, train_rmse, type = "b",
      ylab = "RMSE")
 lines(model_complexity, test_rmse, type = "b", col = "darkorange")
 min(test_rmse)
+
+
 #excercize 2 
 set.seed(9)
 num_obs = nrow(ames_t)
@@ -114,6 +120,7 @@ num_obs = nrow(ames_t)
 train_index = sample(num_obs, size = trunc(.5 * num_obs))
 train_data = ames_t[train_index, ]
 test_data = ames_t[-train_index, ]
+
 #right now best is 36065
 best_model <- 0
 best_model <- lm(SalePrice ~  GrLivArea + KitchenQual + LotArea + LotFrontage + LotArea*LotFrontage + TotalBsmtSF + YearBuilt + YearRemodAdd, data = train_data)
