@@ -122,6 +122,7 @@ train_index = sample(num_obs, size = trunc(.5 * num_obs))
 train_data = ames_t[train_index, ]
 test_data = ames_t[-train_index, ]
 #right now best is 31718.8
+
 drops <- c("Neighborhood","Condition2","RoofMatl", "Exterior1st", "Exterior2nd")
 ames_dropped <- ames_t
 ames_dropped <- ames_dropped[ , !(names(ames_dropped) %in% drops)]
