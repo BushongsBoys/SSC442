@@ -115,8 +115,7 @@ num_obs = nrow(ames_t)
 train_index = sample(num_obs, size = trunc(.5 * num_obs))
 train_data = ames_t[train_index, ]
 test_data = ames_t[-train_index, ]
-#right now best is 31783
-
+#right now best is 31718
 drops <- c("Neighborhood","Condition2","RoofMatl", "Exterior1st", "Exterior2nd")
 ames_dropped <- ames_t
 ames_dropped <- ames_dropped[ , !(names(ames_dropped) %in% drops)]
@@ -125,11 +124,11 @@ fullModel <- lm(SalePrice ~ ., data = ames_dropped)
 
 #step(nullModel, direction = "forward", scope = formula(fullModel))
 #Used steps to pick best variables, neighborhood and rooftype seemed to overfit and removing variables after lot frontage
-best_model <- lm(formula = SalePrice ~ GrLivArea + ExterQual + BsmtQual + GarageCars + 
+best_model <- lm(formula = SalePrice ~ GrLivArea+ GrLivArea*GrLivArea + ExterQual + BsmtQual + GarageCars + 
                    BsmtFinSF1 + KitchenQual + MSSubClass + BsmtExposure + YearBuilt + 
                    Fireplaces + Functional + Condition1 + LotShape + LandContour + 
                    KitchenAbvGr + YearRemodAdd + MasVnrArea + MSZoning + LotFrontage, 
    data = train_data)
 get_rmse(best_model, train_data, 'SalePrice')
 get_rmse(best_model, test_data, 'SalePrice')
-
+summary(best_model)
