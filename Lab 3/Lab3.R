@@ -7,6 +7,7 @@ library(tidyverse)
 library(ggplot2)
 
 
+
 # Function for calculating root means squared error of a model
 rmse = function(actual, predicted) {
   sqrt(mean((actual - predicted) ^ 2))
@@ -114,8 +115,21 @@ num_obs = nrow(ames_t)
 train_index = sample(num_obs, size = trunc(.5 * num_obs))
 train_data = ames_t[train_index, ]
 test_data = ames_t[-train_index, ]
-#right now best is 36065
-best_model <- 0
-best_model <- lm(SalePrice ~  GrLivArea + KitchenQual + LotArea + LotFrontage + LotArea*LotFrontage + TotalBsmtSF + YearBuilt + YearRemodAdd, data = train_data)
+#right now best is 31783
+
+drops <- c("Neighborhood","Condition2","RoofMatl", "Exterior1st", "Exterior2nd")
+ames_dropped <- ames_t
+ames_dropped <- ames_dropped[ , !(names(ames_dropped) %in% drops)]
+nullModel <- lm(SalePrice ~ 1, data = ames_dropped)
+fullModel <- lm(SalePrice ~ ., data = ames_dropped)
+
+#step(nullModel, direction = "forward", scope = formula(fullModel))
+#Used steps to pick best variables, neighborhood and rooftype seemed to overfit and removing variables after lot frontage
+best_model <- lm(formula = SalePrice ~ GrLivArea + ExterQual + BsmtQual + GarageCars + 
+                   BsmtFinSF1 + KitchenQual + MSSubClass + BsmtExposure + YearBuilt + 
+                   Fireplaces + Functional + Condition1 + LotShape + LandContour + 
+                   KitchenAbvGr + YearRemodAdd + MasVnrArea + MSZoning + LotFrontage, 
+   data = train_data)
 get_rmse(best_model, train_data, 'SalePrice')
 get_rmse(best_model, test_data, 'SalePrice')
+
