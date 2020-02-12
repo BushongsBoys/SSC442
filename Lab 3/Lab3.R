@@ -68,7 +68,11 @@ modelCompPlot <- ggplot(data = modelCompData, mapping = aes(x= Complexity, y = R
   labs(title = "RMSE vs Model Complexity") + 
   theme(plot.title = element_text(hjust = .5, size = 18)) 
 
-#excercize 2 
+
+##################################
+
+# Excercize 2 
+
 set.seed(96)
 num_obs = nrow(ames_t)
 
@@ -108,6 +112,8 @@ plot(model_complexity, train_rmse, type = "b",
      ylab = "RMSE")
 lines(model_complexity, test_rmse, type = "b", col = "darkorange")
 min(test_rmse)
+
+
 #excercize 2 
 set.seed(9)
 num_obs = nrow(ames_t)
@@ -115,7 +121,7 @@ num_obs = nrow(ames_t)
 train_index = sample(num_obs, size = trunc(.5 * num_obs))
 train_data = ames_t[train_index, ]
 test_data = ames_t[-train_index, ]
-#right now best is 31718
+#right now best is 31718.8
 drops <- c("Neighborhood","Condition2","RoofMatl", "Exterior1st", "Exterior2nd")
 ames_dropped <- ames_t
 ames_dropped <- ames_dropped[ , !(names(ames_dropped) %in% drops)]
@@ -123,7 +129,7 @@ nullModel <- lm(SalePrice ~ 1, data = ames_dropped)
 fullModel <- lm(SalePrice ~ ., data = ames_dropped)
 
 #step(nullModel, direction = "forward", scope = formula(fullModel))
-#Used steps to pick best variables, neighborhood and rooftype seemed to overfit and removing variables after lot frontage
+#Used steps to pick best variables, neighborhood and rooftype seemed to overfit and removing variables after lot frontage to reduce overfitting
 best_model <- lm(formula = SalePrice ~ GrLivArea+ GrLivArea*GrLivArea + ExterQual + BsmtQual + GarageCars + 
                    BsmtFinSF1 + KitchenQual + MSSubClass + BsmtExposure + YearBuilt + 
                    Fireplaces + Functional + Condition1 + LotShape + LandContour + 
