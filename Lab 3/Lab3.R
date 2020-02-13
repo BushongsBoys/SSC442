@@ -149,7 +149,7 @@ best_model <- gbm::gbm(SalePrice ~ GrLivArea+ GrLivArea*GrLivArea + ExterQual + 
                        n.trees = 5000, 
                        cv.folds = 10
 )
-summary(best_model)
+summary( best_model )
 get_rmse(best_model, train_data, 'SalePrice')
 get_rmse(best_model, test_data, 'SalePrice')
 summary(best_model)
