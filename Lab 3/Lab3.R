@@ -5,6 +5,7 @@ library(dplyr)
 library(plyr)
 library(tidyverse)
 library(ggplot2)
+library(fastDummies)
 
 
 
@@ -115,27 +116,40 @@ min(test_rmse)
 
 
 #excercize 2 
-set.seed(9)
-num_obs = nrow(ames_t)
-
-train_index = sample(num_obs, size = trunc(.5 * num_obs))
-train_data = ames_t[train_index, ]
-test_data = ames_t[-train_index, ]
-#right now best is 31718.8
-
-drops <- c("Neighborhood","Condition2","RoofMatl", "Exterior1st", "Exterior2nd")
-ames_dropped <- ames_t
-ames_dropped <- ames_dropped[ , !(names(ames_dropped) %in% drops)]
-nullModel <- lm(SalePrice ~ 1, data = ames_dropped)
-fullModel <- lm(SalePrice ~ ., data = ames_dropped)
+ames2 <- ames_t
+ames2 <- fastDummies::dummy_cols(ames2, select_columns = c("Neighborhood","RoofMatl"))
+nullModel <- lm(SalePrice ~ 1, data = ames2)
+fullModel <- lm(SalePrice ~ ., data = ames2)
 
 #step(nullModel, direction = "forward", scope = formula(fullModel))
-#Used steps to pick best variables, neighborhood and rooftype seemed to overfit and removing variables after lot frontage to reduce overfitting
+set.seed(9)
+
+num_obs = nrow(ames2)
+
+train_index = sample(num_obs, size = trunc(.5 * num_obs))
+train_data = ames2[train_index, ]
+test_data = ames2[-train_index, ]
+#right now best is 30539.99
 best_model <- lm(formula = SalePrice ~ GrLivArea+ GrLivArea*GrLivArea + ExterQual + BsmtQual + GarageCars + 
                    BsmtFinSF1 + KitchenQual + MSSubClass + BsmtExposure + YearBuilt + 
                    Fireplaces + Functional + Condition1 + LotShape + LandContour + 
-                   KitchenAbvGr + YearRemodAdd + MasVnrArea + MSZoning + LotFrontage, 
+                   KitchenAbvGr + YearRemodAdd + MasVnrArea + MSZoning + LotFrontage + BedroomAbvGr, 
    data = train_data)
+get_rmse(best_model, train_data, 'SalePrice')
+get_rmse(best_model, test_data, 'SalePrice')
+summary(best_model)
+
+best_model <- gbm::gbm(SalePrice ~ GrLivArea+ GrLivArea*GrLivArea + ExterQual + BsmtQual + GarageCars + 
+                         BsmtFinSF1 + KitchenQual + MSSubClass + BsmtExposure + YearBuilt + 
+                         Fireplaces + Functional + Condition1 + LotShape + LandContour + 
+                         KitchenAbvGr + YearRemodAdd + MasVnrArea + MSZoning + LotFrontage + BedroomAbvGr, 
+                       data = train_data, 
+                       # data set
+                       verbose = TRUE, 
+                       n.trees = 5000, 
+                       cv.folds = 10
+)
+summary(best_model)
 get_rmse(best_model, train_data, 'SalePrice')
 get_rmse(best_model, test_data, 'SalePrice')
 summary(best_model)

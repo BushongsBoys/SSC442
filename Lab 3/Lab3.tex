@@ -1,0 +1,585 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Lab3},
+  pdfauthor={Group 17},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{Lab3}
+\author{Group 17}
+\date{2/11/2020}
+
+\begin{document}
+\maketitle
+
+\hypertarget{exersize-1}{%
+\subsection{Exersize 1}\label{exersize-1}}
+
+The code below is 15 models we created based on a forward selection
+process. Criteria for adding the next parameter was which additional
+varaible results a lower RSS determined by the function step(). In
+addition we created a plot comparing the complexity of models to its
+Root Mean Squared Error. Complexity was measure by the number of
+predictors in a model. It is important to note that for categorical
+data, each dummy variable acts as a predictor. Threfore, a variable like
+Neighborhood with 25 levels would result in a complexity of 24.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{-1}
+\tightlist
+\item
+  nullModel \textless- lm(SalePrice \textasciitilde{} 1, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} Neighborhood, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} Neighborhood + GrLivArea, data =
+  ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} Neighborhood + GrLivArea + KitchenQual,
+  data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} Neighborhood + GrLivArea + KitchenQual
+  + BsmtExposure, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} Neighborhood + GrLivArea + KitchenQual
+  + BsmtExposure + RoofMatl, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} Neighborhood + GrLivArea + KitchenQual
+  + BsmtExposure + RoofMatl + TotalBsmtSF, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} BsmtQual + Neighborhood + GrLivArea +
+  KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} Condition2 + BsmtQual + Neighborhood +
+  GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data
+  = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} BsmtFinSF1 + Condition2 + BsmtQual +
+  Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl +
+  TotalBsmtSF, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} BldgType + BsmtFinSF1 + Condition2 +
+  BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure +
+  RoofMatl + TotalBsmtSF, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} YearBuilt + BldgType + BsmtFinSF1 +
+  Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual +
+  BsmtExposure + RoofMatl + TotalBsmtSF, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} ExterQual + YearBuilt + BldgType +
+  BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea +
+  KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} Functional + ExterQual + YearBuilt +
+  BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood +
+  GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data
+  = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} LotArea + Functional + ExterQual +
+  YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual +
+  Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl +
+  TotalBsmtSF, data = ames\_t)
+\item
+  lm(SalePrice \textasciitilde{} YearRemodAdd + LotArea + Functional +
+  ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual
+  + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl +
+  TotalBsmtSF, data = ames\_t)
+\end{enumerate}
+
+\includegraphics{Lab3_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+As we can see from the graph above, as the model gets more complex, the
+Root Mean Squared Error will decrease. However, just because the the
+mean squared error decreases does not mean we should use the full model.
+The RMSE is the measure by taking sqrt(mean(actual - predicted)\^{}2),
+therfore, when we add more predictors to our model, it is going to fit
+it better and of course redcuce the RMSE. However, when making models,
+we are not looking to fit our sample with the best model possible, but
+find the real relationship of something. The full model will often
+overfit the data causing greater RMSE in the actual population.
+\#\#Excercize 2
+\includegraphics{Lab3_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+\begin{verbatim}
+## [1] 37625.61
+\end{verbatim}
+
+\begin{verbatim}
+## [1] 33014.77
+\end{verbatim}
+
+\begin{verbatim}
+## [1] 31692.69
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = SalePrice ~ GrLivArea + GrLivArea * GrLivArea + 
+##     ExterQual + BsmtQual + GarageCars + BsmtFinSF1 + KitchenQual + 
+##     MSSubClass + BsmtExposure + YearBuilt + Fireplaces + Functional + 
+##     Condition1 + LotShape + LandContour + KitchenAbvGr + YearRemodAdd + 
+##     MasVnrArea + MSZoning + LotFrontage + BedroomAbvGr, data = train_data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -379511  -15793     108   13227  243595 
+## 
+## Coefficients:
+##                   Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)     -3.151e+05  2.178e+05  -1.447 0.148365    
+## GrLivArea        6.703e+01  4.633e+00  14.469  < 2e-16 ***
+## ExterQualFa     -4.398e+04  1.801e+04  -2.441 0.014884 *  
+## ExterQualGd     -2.848e+04  9.694e+03  -2.938 0.003418 ** 
+## ExterQualTA     -4.375e+04  1.060e+04  -4.129 4.10e-05 ***
+## BsmtQualFa      -5.415e+04  1.112e+04  -4.870 1.39e-06 ***
+## BsmtQualGd      -3.894e+04  6.140e+03  -6.341 4.15e-10 ***
+## BsmtQualTA      -4.801e+04  7.408e+03  -6.481 1.74e-10 ***
+## GarageCars       1.347e+04  2.417e+03   5.574 3.59e-08 ***
+## BsmtFinSF1       7.104e+00  3.263e+00   2.177 0.029810 *  
+## KitchenQualFa   -3.082e+04  1.298e+04  -2.376 0.017798 *  
+## KitchenQualGd   -2.905e+04  6.981e+03  -4.162 3.57e-05 ***
+## KitchenQualTA   -3.460e+04  7.968e+03  -4.342 1.63e-05 ***
+## MSSubClass      -2.179e+02  3.733e+01  -5.838 8.17e-09 ***
+## BsmtExposureGd   1.375e+04  5.643e+03   2.437 0.015073 *  
+## BsmtExposureMn  -1.232e+04  5.737e+03  -2.147 0.032117 *  
+## BsmtExposureNo  -1.458e+04  3.993e+03  -3.652 0.000280 ***
+## YearBuilt        2.845e+01  8.056e+01   0.353 0.724079    
+## Fireplaces       9.418e+03  2.400e+03   3.924 9.59e-05 ***
+## FunctionalMaj2  -5.490e+03  3.194e+04  -0.172 0.863581    
+## FunctionalMin1   2.797e+03  2.240e+04   0.125 0.900646    
+## FunctionalMin2  -6.742e+03  2.238e+04  -0.301 0.763374    
+## FunctionalMod    1.490e+04  2.367e+04   0.630 0.529112    
+## FunctionalSev   -7.754e+04  4.025e+04  -1.926 0.054490 .  
+## FunctionalTyp    2.385e+04  2.076e+04   1.149 0.251059    
+## Condition1Feedr -1.296e+03  8.819e+03  -0.147 0.883225    
+## Condition1Norm   1.517e+04  7.167e+03   2.117 0.034612 *  
+## Condition1PosA   4.714e+03  1.725e+04   0.273 0.784757    
+## Condition1PosN   3.882e+03  1.267e+04   0.306 0.759347    
+## Condition1RRAe  -4.326e+03  1.432e+04  -0.302 0.762624    
+## Condition1RRAn   2.878e+04  1.489e+04   1.932 0.053731 .  
+## Condition1RRNe  -5.684e+03  3.517e+04  -0.162 0.871662    
+## Condition1RRNn  -1.546e+04  3.614e+04  -0.428 0.669046    
+## LotShapeIR2      1.224e+03  7.857e+03   0.156 0.876297    
+## LotShapeIR3     -6.715e+04  1.592e+04  -4.218 2.80e-05 ***
+## LotShapeReg     -4.368e+03  3.024e+03  -1.444 0.149088    
+## LandContourHLS   2.625e+04  9.557e+03   2.746 0.006182 ** 
+## LandContourLow   1.366e+04  1.099e+04   1.243 0.214347    
+## LandContourLvl   9.453e+03  7.250e+03   1.304 0.192712    
+## KitchenAbvGr    -2.268e+04  6.659e+03  -3.406 0.000698 ***
+## YearRemodAdd     1.975e+02  9.093e+01   2.172 0.030229 *  
+## MasVnrArea       1.764e+01  8.852e+00   1.993 0.046623 *  
+## MSZoningFV       5.315e+04  1.751e+04   3.036 0.002488 ** 
+## MSZoningRH       2.991e+04  1.982e+04   1.509 0.131791    
+## MSZoningRL       4.295e+04  1.624e+04   2.646 0.008345 ** 
+## MSZoningRM       2.981e+04  1.633e+04   1.825 0.068464 .  
+## LotFrontage     -1.868e+02  6.894e+01  -2.710 0.006891 ** 
+## BedroomAbvGr    -1.470e+03  2.246e+03  -0.654 0.513202    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 34160 on 682 degrees of freedom
+## Multiple R-squared:  0.8334, Adjusted R-squared:  0.8219 
+## F-statistic: 72.57 on 47 and 682 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\begin{verbatim}
+## Distribution not specified, assuming gaussian ...
+## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+##      1 6119601177.0237             nan     0.1000 467483863.0612
+##      2 5727557022.7848             nan     0.1000 372180436.6660
+##      3 5364735821.9491             nan     0.1000 361420579.7918
+##      4 4980661944.3142             nan     0.1000 306204173.7686
+##      5 4675178162.0355             nan     0.1000 248300431.8197
+##      6 4446124943.0361             nan     0.1000 251428528.6220
+##      7 4238958912.9439             nan     0.1000 223978171.1800
+##      8 4039200548.7594             nan     0.1000 191175107.6046
+##      9 3898151692.6296             nan     0.1000 84922427.3438
+##     10 3711271399.1494             nan     0.1000 134219732.0536
+##     20 2466459917.9403             nan     0.1000 66869111.0878
+##     40 1517900992.0579             nan     0.1000 13602031.4184
+##     60 1210497281.2703             nan     0.1000 -15315763.9717
+##     80 1074875772.9781             nan     0.1000 1804289.0576
+##    100 1020492311.1037             nan     0.1000 2993509.5398
+##    120 983056248.3216             nan     0.1000 -3283925.0916
+##    140 955638050.2047             nan     0.1000 -5580881.1269
+##    160 934206783.9150             nan     0.1000 -8341706.9721
+##    180 920172936.0571             nan     0.1000 -6061039.0319
+##    200 908507734.2224             nan     0.1000 10611.4301
+##    220 893867788.3848             nan     0.1000 -4001104.8275
+##    240 890718846.1641             nan     0.1000 -3791612.0342
+##    260 879536459.3854             nan     0.1000 -97917.2801
+##    280 872490911.3009             nan     0.1000 583215.3290
+##    300 864124838.1326             nan     0.1000 -8439494.6903
+##    320 859845573.3739             nan     0.1000 -6067546.5042
+##    340 854722294.4404             nan     0.1000 -7550914.5513
+##    360 843954041.7790             nan     0.1000 -9863646.2312
+##    380 842028516.5698             nan     0.1000 -2046837.6664
+##    400 836282043.1797             nan     0.1000 -4235984.8644
+##    420 831895571.1239             nan     0.1000 -7574758.0295
+##    440 830114439.9356             nan     0.1000 -3531393.6230
+##    460 824372067.1409             nan     0.1000 -4122714.8958
+##    480 821980145.0468             nan     0.1000 -4663136.0318
+##    500 816240526.7644             nan     0.1000 -8652844.9614
+##    520 813677654.4327             nan     0.1000 -6310428.6343
+##    540 808301728.0606             nan     0.1000 -6827735.3891
+##    560 803927106.4053             nan     0.1000 -8717922.3858
+##    580 800002920.0397             nan     0.1000 -8832504.5399
+##    600 798492441.7383             nan     0.1000 -2026460.0435
+##    620 801102263.0544             nan     0.1000 -12399795.0476
+##    640 796017701.5408             nan     0.1000 -2977618.2978
+##    660 789114843.6704             nan     0.1000 -2779578.1766
+##    680 789394645.8703             nan     0.1000 -7501835.6295
+##    700 785469936.8240             nan     0.1000 -3504258.4562
+##    720 786532322.2435             nan     0.1000 -7737944.8094
+##    740 783734401.7813             nan     0.1000 -5252379.8988
+##    760 778452708.7156             nan     0.1000 -7612841.9267
+##    780 774708760.0401             nan     0.1000 -4891357.2927
+##    800 771738976.7385             nan     0.1000 -4976291.7035
+##    820 768451973.6827             nan     0.1000 -2226027.9696
+##    840 765296661.4681             nan     0.1000 -5572918.3450
+##    860 762296090.3200             nan     0.1000 -12356589.7366
+##    880 759182373.1348             nan     0.1000 -12197578.5227
+##    900 755697880.7579             nan     0.1000 -12153980.9769
+##    920 751870336.7622             nan     0.1000 -8391690.7741
+##    940 751603183.0185             nan     0.1000 -5712813.9535
+##    960 749917609.6354             nan     0.1000 -5575230.1779
+##    980 746947535.4775             nan     0.1000 -12940985.9153
+##   1000 745145063.5099             nan     0.1000 -975180.1016
+##   1020 744310454.7053             nan     0.1000 -8264832.7620
+##   1040 741465540.7241             nan     0.1000 -4725036.3979
+##   1060 744539501.7994             nan     0.1000 -3068172.7235
+##   1080 736540825.3405             nan     0.1000 -199526.5759
+##   1100 736847073.5853             nan     0.1000 -3567696.6274
+##   1120 737495224.8680             nan     0.1000 -2466714.7347
+##   1140 729758115.8007             nan     0.1000 -1194966.8141
+##   1160 728680556.7455             nan     0.1000 -8596788.5636
+##   1180 726079689.3934             nan     0.1000 -2872224.4252
+##   1200 725412964.6359             nan     0.1000 -1246684.0323
+##   1220 720580741.1187             nan     0.1000 -3392158.4280
+##   1240 720181562.1888             nan     0.1000 -3678366.1828
+##   1260 719949937.0581             nan     0.1000 -4044879.2069
+##   1280 721337276.5558             nan     0.1000 -6956209.7624
+##   1300 725009021.7330             nan     0.1000 -11877249.1197
+##   1320 719370794.2488             nan     0.1000 -3431577.5947
+##   1340 716343288.7568             nan     0.1000 -8135111.0298
+##   1360 714132741.6895             nan     0.1000 -4840453.8184
+##   1380 710339024.4445             nan     0.1000 -2359007.2977
+##   1400 711718028.8139             nan     0.1000 -155590.2803
+##   1420 707603473.6759             nan     0.1000 -6662191.4210
+##   1440 706803368.0600             nan     0.1000 -6210407.4243
+##   1460 702790539.4965             nan     0.1000 -3558664.6589
+##   1480 701361439.0062             nan     0.1000 -3347943.3102
+##   1500 700940783.0338             nan     0.1000 -5526143.9005
+##   1520 699755198.1741             nan     0.1000 -3853782.7356
+##   1540 695717826.2203             nan     0.1000 -3337427.7453
+##   1560 700189521.4083             nan     0.1000 -2970947.5635
+##   1580 692464819.6188             nan     0.1000 -8998433.9830
+##   1600 691167843.7257             nan     0.1000 -2993345.0874
+##   1620 692729585.4493             nan     0.1000 -6368467.0651
+##   1640 690281328.3588             nan     0.1000 -4635559.0185
+##   1660 688035143.2481             nan     0.1000 -6853177.8951
+##   1680 687523828.7628             nan     0.1000 -509825.5305
+##   1700 687407358.6194             nan     0.1000 -3749672.5487
+##   1720 682895790.1574             nan     0.1000 -5259416.7553
+##   1740 681415972.6740             nan     0.1000 -1855223.4266
+##   1760 680827325.4245             nan     0.1000 -2170618.8022
+##   1780 678090408.0743             nan     0.1000 -3517392.5262
+##   1800 676265881.3190             nan     0.1000 -3380840.9527
+##   1820 677837786.9858             nan     0.1000 -3330039.4852
+##   1840 672517112.3010             nan     0.1000 -6676997.2746
+##   1860 673489937.7612             nan     0.1000 -3264789.9880
+##   1880 676181364.3099             nan     0.1000 -6275337.1911
+##   1900 676700507.8063             nan     0.1000 -4862367.5444
+##   1920 671331814.8678             nan     0.1000 -1936631.8110
+##   1940 667085825.5670             nan     0.1000 -3341527.7441
+##   1960 666368331.8593             nan     0.1000 -6494346.8594
+##   1980 665288933.8513             nan     0.1000 -2657983.9294
+##   2000 666118346.7475             nan     0.1000 -4705271.3962
+##   2020 666876594.4684             nan     0.1000 -6661655.6187
+##   2040 666682129.5084             nan     0.1000 -3507159.6410
+##   2060 662281902.7395             nan     0.1000 -276164.1693
+##   2080 658205347.8156             nan     0.1000 -2703269.0220
+##   2100 657813986.5231             nan     0.1000 -7088629.3286
+##   2120 655678880.4535             nan     0.1000 -10811931.0455
+##   2140 655414886.2402             nan     0.1000 -12893756.8905
+##   2160 655570560.0688             nan     0.1000 -4834088.8884
+##   2180 652929611.4981             nan     0.1000 -3399888.3654
+##   2200 652842175.8283             nan     0.1000 -1634700.4990
+##   2220 651831597.5348             nan     0.1000 -6207778.0922
+##   2240 650658266.7197             nan     0.1000 -2760311.3343
+##   2260 651322050.9064             nan     0.1000 -2023471.2422
+##   2280 650519587.3763             nan     0.1000 -7121356.7716
+##   2300 647417476.0219             nan     0.1000 -7472431.2798
+##   2320 645606096.4529             nan     0.1000 -3314932.4101
+##   2340 651033686.0558             nan     0.1000 -4864681.3407
+##   2360 642958188.0092             nan     0.1000 -4962949.2837
+##   2380 644508519.4493             nan     0.1000 -8197444.6467
+##   2400 646140926.6444             nan     0.1000 -4333271.7813
+##   2420 644057363.1260             nan     0.1000 -361765.0649
+##   2440 638909548.3315             nan     0.1000 -3376107.0008
+##   2460 636966692.8447             nan     0.1000 -6701473.8235
+##   2480 636912148.7807             nan     0.1000 -2477666.3426
+##   2500 637734698.5726             nan     0.1000 -1214081.5349
+##   2520 637561083.3548             nan     0.1000 -1902544.5464
+##   2540 636038084.9325             nan     0.1000 -2170575.4891
+##   2560 634709739.2104             nan     0.1000 -6720986.6721
+##   2580 633239376.8659             nan     0.1000 -2459273.5966
+##   2600 633669221.2029             nan     0.1000 -4699282.5429
+##   2620 631948779.1548             nan     0.1000 -2810673.3441
+##   2640 632450249.2242             nan     0.1000 -3825177.3496
+##   2660 631335624.2103             nan     0.1000 -9896671.9593
+##   2680 630489090.9027             nan     0.1000 -4578597.8542
+##   2700 629992528.1386             nan     0.1000 -871551.7806
+##   2720 629156719.3918             nan     0.1000 -675731.2965
+##   2740 629302205.6911             nan     0.1000 -4237047.4654
+##   2760 627290644.8169             nan     0.1000 -4440511.9552
+##   2780 627500617.5181             nan     0.1000 -1250457.8088
+##   2800 627850143.6509             nan     0.1000 -6660193.9514
+##   2820 627546409.3380             nan     0.1000 -3845413.9786
+##   2840 625575409.8936             nan     0.1000 -3706063.1246
+##   2860 625097203.4831             nan     0.1000 -2763169.7487
+##   2880 624801367.8494             nan     0.1000 -4463017.6859
+##   2900 621859879.1764             nan     0.1000 -644608.3199
+##   2920 622382980.5202             nan     0.1000 -4838040.8705
+##   2940 621484353.3437             nan     0.1000 -6379351.5778
+##   2960 619178642.1480             nan     0.1000 -3000474.7548
+##   2980 619705587.4457             nan     0.1000 -2413785.1784
+##   3000 618850787.9814             nan     0.1000 -4016460.6801
+##   3020 616779559.2656             nan     0.1000 -1769388.4766
+##   3040 617063573.4849             nan     0.1000 -2079300.4612
+##   3060 617245879.6076             nan     0.1000 -7125577.8318
+##   3080 615798414.3971             nan     0.1000 -6442979.6667
+##   3100 616459817.7392             nan     0.1000 -8022785.6370
+##   3120 615709708.7900             nan     0.1000 -2632971.3450
+##   3140 612607864.1860             nan     0.1000 -6823330.0011
+##   3160 615789152.6327             nan     0.1000 -3529986.0220
+##   3180 614078597.4288             nan     0.1000 -6208838.0125
+##   3200 614170654.6310             nan     0.1000 -6075967.5573
+##   3220 611812244.3005             nan     0.1000 -3016216.3039
+##   3240 610780937.6099             nan     0.1000 -6020684.9691
+##   3260 608355775.2098             nan     0.1000 -2994065.2515
+##   3280 608518813.3328             nan     0.1000 -2750330.7211
+##   3300 605963574.2707             nan     0.1000 -2322930.9466
+##   3320 605543543.6859             nan     0.1000 -1132689.5098
+##   3340 604412999.6433             nan     0.1000 -3219367.3904
+##   3360 607122280.1092             nan     0.1000 -6176351.7456
+##   3380 605422558.0128             nan     0.1000 -445331.6974
+##   3400 604456256.3840             nan     0.1000 -643438.2830
+##   3420 602643643.1544             nan     0.1000 -3865719.1604
+##   3440 599515873.1269             nan     0.1000 -1121508.2489
+##   3460 603025802.2892             nan     0.1000 -3128467.4365
+##   3480 600122371.2610             nan     0.1000 -1996359.7393
+##   3500 600855525.6003             nan     0.1000 -9965954.2379
+##   3520 597233851.3902             nan     0.1000 -2640815.5178
+##   3540 596459255.9001             nan     0.1000 -3190796.4586
+##   3560 595592129.6892             nan     0.1000 -5187993.1773
+##   3580 595880272.3287             nan     0.1000 -1605241.4368
+##   3600 594823323.6505             nan     0.1000 -1539719.3215
+##   3620 594447640.6358             nan     0.1000 -1013458.1773
+##   3640 594994980.4164             nan     0.1000 -11256386.7541
+##   3660 595137704.1740             nan     0.1000 -5556876.7812
+##   3680 593379212.0337             nan     0.1000 -3500343.5455
+##   3700 591012518.1124             nan     0.1000 -3914484.6683
+##   3720 594386552.9009             nan     0.1000 -6337198.5089
+##   3740 590444693.0980             nan     0.1000 -8166277.9347
+##   3760 589953861.4116             nan     0.1000 -4596290.8053
+##   3780 590303040.1366             nan     0.1000 -5917721.7431
+##   3800 589532453.8874             nan     0.1000 -5445063.2340
+##   3820 589750320.7915             nan     0.1000 -2097972.3007
+##   3840 588073262.6142             nan     0.1000 -5047138.9942
+##   3860 584885251.7499             nan     0.1000 -4559858.4561
+##   3880 584873286.1008             nan     0.1000 -5025789.1118
+##   3900 583901183.9547             nan     0.1000 -6239423.2278
+##   3920 586502166.0517             nan     0.1000 -2621554.2024
+##   3940 584889804.8758             nan     0.1000 -1502072.6578
+##   3960 586105021.2121             nan     0.1000 -6916946.2028
+##   3980 582960725.8073             nan     0.1000 -2253528.1939
+##   4000 582528135.7581             nan     0.1000 -3778720.8671
+##   4020 579195172.6153             nan     0.1000 -4806451.4748
+##   4040 578685278.0407             nan     0.1000 -6003903.1918
+##   4060 578508475.1806             nan     0.1000 -2391702.3117
+##   4080 579505287.5414             nan     0.1000 -5576817.2528
+##   4100 577221727.2952             nan     0.1000 -5311089.0328
+##   4120 576536383.7314             nan     0.1000 -1140218.4560
+##   4140 574585032.6640             nan     0.1000 -4300984.4263
+##   4160 575090224.2092             nan     0.1000 -3076745.2973
+##   4180 574443234.5537             nan     0.1000 -4023272.7052
+##   4200 576159845.8896             nan     0.1000 -3831884.5043
+##   4220 578481207.4063             nan     0.1000 -6549478.4262
+##   4240 577923175.5759             nan     0.1000 -1783895.7396
+##   4260 574328533.6789             nan     0.1000 -1240479.2488
+##   4280 574984388.0081             nan     0.1000 -4290199.6020
+##   4300 575442436.9448             nan     0.1000 -7218899.4822
+##   4320 575979239.6533             nan     0.1000 -2645093.0342
+##   4340 573324288.2620             nan     0.1000 -2960734.6352
+##   4360 572975030.6312             nan     0.1000 -4646738.4769
+##   4380 572247894.9567             nan     0.1000 -5819995.5826
+##   4400 575414211.9970             nan     0.1000 -2895572.1452
+##   4420 572585500.6282             nan     0.1000 -3894261.4754
+##   4440 574599329.6384             nan     0.1000 -2011474.2712
+##   4460 572775913.3312             nan     0.1000 -3163387.3007
+##   4480 573171185.8663             nan     0.1000 -968165.3624
+##   4500 571320452.5356             nan     0.1000 -4319148.0966
+##   4520 572604095.9452             nan     0.1000 -8234623.2654
+##   4540 569225364.8051             nan     0.1000 -1856984.6428
+##   4560 568130340.6669             nan     0.1000 -1916740.9869
+##   4580 568261883.0911             nan     0.1000 -3214890.7734
+##   4600 568874934.0239             nan     0.1000 -2177799.2854
+##   4620 567396543.5137             nan     0.1000 -5722433.6173
+##   4640 567513940.9915             nan     0.1000 -3891907.5815
+##   4660 567477871.7678             nan     0.1000 -9677169.4150
+##   4680 565921302.1641             nan     0.1000 -2340262.9710
+##   4700 563101737.0332             nan     0.1000 -1493031.5454
+##   4720 564886561.0592             nan     0.1000 -2430313.1423
+##   4740 566709372.1133             nan     0.1000 -3907782.9907
+##   4760 563908268.5047             nan     0.1000 -3076772.3060
+##   4780 565341993.2730             nan     0.1000 -2174496.4051
+##   4800 563428621.9924             nan     0.1000 -2724102.0841
+##   4820 563348181.4609             nan     0.1000 -968184.2704
+##   4840 561299887.8274             nan     0.1000 -7041617.6280
+##   4860 561379590.7548             nan     0.1000 -4609545.7256
+##   4880 563066534.9790             nan     0.1000 -3893570.8037
+##   4900 561560136.9156             nan     0.1000 -7167279.1189
+##   4920 559531120.2430             nan     0.1000 -2482045.5635
+##   4940 561311683.5602             nan     0.1000 -5927858.1520
+##   4960 557652373.9135             nan     0.1000 -4027006.9851
+##   4980 558211314.2562             nan     0.1000 -2901112.4647
+##   5000 558627455.9667             nan     0.1000 -1952014.4818
+\end{verbatim}
+
+\begin{verbatim}
+##                       var     rel.inf
+## GrLivArea       GrLivArea 26.31479454
+## BsmtFinSF1     BsmtFinSF1 22.10627883
+## LotFrontage   LotFrontage 14.55072438
+## ExterQual       ExterQual  8.52501167
+## MasVnrArea     MasVnrArea  5.34079447
+## YearBuilt       YearBuilt  4.36390668
+## LandContour   LandContour  3.63688926
+## GarageCars     GarageCars  2.92586994
+## YearRemodAdd YearRemodAdd  2.50488467
+## BsmtQual         BsmtQual  2.49346155
+## KitchenQual   KitchenQual  2.00346916
+## LotShape         LotShape  1.41702761
+## Fireplaces     Fireplaces  0.84374332
+## Condition1     Condition1  0.84129084
+## BsmtExposure BsmtExposure  0.83569041
+## MSZoning         MSZoning  0.51112766
+## MSSubClass     MSSubClass  0.26941679
+## BedroomAbvGr BedroomAbvGr  0.25422648
+## Functional     Functional  0.16584926
+## KitchenAbvGr KitchenAbvGr  0.09554246
+\end{verbatim}
+
+\begin{verbatim}
+## Using 216 trees...
+\end{verbatim}
+
+\begin{verbatim}
+## [1] 29923.25
+\end{verbatim}
+
+\begin{verbatim}
+## Using 216 trees...
+\end{verbatim}
+
+\begin{verbatim}
+## [1] 30539.99
+\end{verbatim}
+
+\includegraphics{Lab3_files/figure-latex/unnamed-chunk-2-2.pdf}
+
+\begin{verbatim}
+##                       var     rel.inf
+## GrLivArea       GrLivArea 26.31479454
+## BsmtFinSF1     BsmtFinSF1 22.10627883
+## LotFrontage   LotFrontage 14.55072438
+## ExterQual       ExterQual  8.52501167
+## MasVnrArea     MasVnrArea  5.34079447
+## YearBuilt       YearBuilt  4.36390668
+## LandContour   LandContour  3.63688926
+## GarageCars     GarageCars  2.92586994
+## YearRemodAdd YearRemodAdd  2.50488467
+## BsmtQual         BsmtQual  2.49346155
+## KitchenQual   KitchenQual  2.00346916
+## LotShape         LotShape  1.41702761
+## Fireplaces     Fireplaces  0.84374332
+## Condition1     Condition1  0.84129084
+## BsmtExposure BsmtExposure  0.83569041
+## MSZoning         MSZoning  0.51112766
+## MSSubClass     MSSubClass  0.26941679
+## BedroomAbvGr BedroomAbvGr  0.25422648
+## Functional     Functional  0.16584926
+## KitchenAbvGr KitchenAbvGr  0.09554246
+\end{verbatim}
+
+The best mean squared error we were able to achieve was 30539.99. To get
+this we used the best features from the data as found by the feed
+forward model. We removed roof type and neighborhood as they seemed to
+cause overfitting. Using GrLivArea squared increased the performance of
+the model probably due to an obeservable dimishing return to square
+footage in homes. Using a gradiant boosted tree regression through the
+gbm package also allowed us to perform slightly better than the linear
+regression. The test and train rmse are close which we took to be a good
+sign that we hadn't over or underfitted the data too much. We think our
+model overall will perform somewhat in the middle of the pack in the
+class.
+
+\end{document}

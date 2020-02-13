@@ -2,7 +2,9 @@
 title: "Lab3"
 author: "Group 17"
 date: "2/11/2020"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -11,8 +13,7 @@ library(dplyr)
 library(plyr)
 library(tidyverse)
 library(ggplot2)
-
-# Function for calculating root means squared error of a model
+library(gbm)          # basic implementation
 rmse = function(actual, predicted) {
   sqrt(mean((actual - predicted) ^ 2))
 }
@@ -37,7 +38,7 @@ ames_t <- ames_t %>% fill(names(.))
 
 ```
 
-## Exersize 1 
+## Exercise 1 
 
 The code below is 15 models we created based on a forward selection process. Criteria for adding the next parameter was which additional varaible results a lower RSS determined by the function step(). In addition we created a plot comparing the complexity of models to its Root Mean Squared Error. Complexity was measure by the number of predictors in a model. It is important to note that for categorical data, each dummy variable acts as a predictor. Threfore, a variable like Neighborhood with 25 levels would result in a complexity of 24. 
 
@@ -103,14 +104,87 @@ plot(modelCompPlot)
 
 
 As we can see from the graph above, as the model gets more complex, the Root Mean Squared Error will decrease. However, just because the the mean squared error decreases does not mean we should use the full model. The RMSE is the measure by taking sqrt(mean(actual - predicted)^2), therfore, when we add more predictors to our model, it is going to fit it better and of course redcuce the RMSE. However, when making models, we are not looking to fit our sample with the best model possible, but find the real relationship of something. The full model will often overfit the data causing greater RMSE in the actual population. 
+##Exercise 2
+```{r, echo = FALSE }
+
+set.seed(96)
+num_obs = nrow(ames_t)
+
+train_index = sample(num_obs, size = trunc(.9 * num_obs))
+train_data = ames_t[train_index, ]
+test_data = ames_t[-train_index, ]
+
+get_rmse = function(model, data, response) {
+  rmse(actual = subset(data, select = response, drop = TRUE),
+       predicted = predict(model, data))
+}
+#models2
+models2 <- list(model1 <- lm(SalePrice ~ Neighborhood, data = train_data),
+               model2 <- lm(SalePrice ~ Neighborhood + GrLivArea, data = train_data),
+               model3 <- lm(SalePrice ~ Neighborhood + GrLivArea + KitchenQual, data = train_data),
+               model4 <- lm(SalePrice ~ Neighborhood + GrLivArea + KitchenQual + BsmtExposure, data = train_data),
+               model5 <- lm(SalePrice ~ Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl, data = train_data),
+               model6 <- lm(SalePrice ~ Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model7 <- lm(SalePrice ~ BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model8 <- lm(SalePrice ~ Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model9 <- lm(SalePrice ~ BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model10 <- lm(SalePrice ~ BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model11 <- lm(SalePrice ~ YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model12 <- lm(SalePrice ~ ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model13 <- lm(SalePrice ~ Functional + ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model14 <- lm(SalePrice ~ LotArea + Functional + ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data),
+               model15 <- lm(SalePrice ~ YearRemodAdd + LotArea + Functional + ExterQual + YearBuilt + BldgType + BsmtFinSF1 + Condition2 + BsmtQual + Neighborhood + GrLivArea + KitchenQual + BsmtExposure + RoofMatl + TotalBsmtSF, data = train_data))
+
+train_rmse = sapply(models2, get_rmse, data = train_data, response = "SalePrice")
+test_rmse = sapply(models2, get_rmse, data = test_data, response = "SalePrice")
+model_complexity = sapply(models2, get_complexity)
+plot(model_complexity, train_rmse, type = "b",
+     ylim = c(min(c(train_rmse, test_rmse)) - 0.02,
+              max(c(train_rmse, test_rmse)) + 0.02),
+     col = "dodgerblue",
+     xlab = "Model Size",
+     ylab = "RMSE")
+lines(model_complexity, test_rmse, type = "b", col = "darkorange")
+min(test_rmse)
 
 
-## Including Plots
+#excercize 2 
+ames2 <- ames_t
+ames2 <- fastDummies::dummy_cols(ames2, select_columns = c("Neighborhood","RoofMatl"))
+nullModel <- lm(SalePrice ~ 1, data = ames2)
+fullModel <- lm(SalePrice ~ ., data = ames2)
 
-You can also embed plots, for example:
+#step(nullModel, direction = "forward", scope = formula(fullModel))
+set.seed(9)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+num_obs = nrow(ames2)
+
+train_index = sample(num_obs, size = trunc(.5 * num_obs))
+train_data = ames2[train_index, ]
+test_data = ames2[-train_index, ]
+#right now best is 30539.99
+best_model <- lm(formula = SalePrice ~ GrLivArea+ GrLivArea*GrLivArea + ExterQual + BsmtQual + GarageCars + 
+                   BsmtFinSF1 + KitchenQual + MSSubClass + BsmtExposure + YearBuilt + 
+                   Fireplaces + Functional + Condition1 + LotShape + LandContour + 
+                   KitchenAbvGr + YearRemodAdd + MasVnrArea + MSZoning + LotFrontage + BedroomAbvGr, 
+   data = train_data)
+get_rmse(best_model, train_data, 'SalePrice')
+get_rmse(best_model, test_data, 'SalePrice')
+summary(best_model)
+
+best_model <- gbm::gbm(SalePrice ~ GrLivArea+ GrLivArea*GrLivArea + ExterQual + BsmtQual + GarageCars + 
+                         BsmtFinSF1 + KitchenQual + MSSubClass + BsmtExposure + YearBuilt + 
+                         Fireplaces + Functional + Condition1 + LotShape + LandContour + 
+                         KitchenAbvGr + YearRemodAdd + MasVnrArea + MSZoning + LotFrontage + BedroomAbvGr, 
+                       data = train_data, 
+                       # data set
+                       verbose = FALSE, 
+                       n.trees = 5000, 
+                       cv.folds = 10
+)
+summary(best_model)
+get_rmse(best_model, train_data, 'SalePrice')
+get_rmse(best_model, test_data, 'SalePrice')
+summary(best_model)
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+The best mean squared error we were able to achieve was 30539.99. To get this we used the best features from the data as found by the feed forward model. We removed roof type and neighborhood as they seemed to cause overfitting. Using GrLivArea squared increased the performance of the model probably due to an obeservable dimishing return to square footage in homes. Using a gradiant boosted tree regression through the gbm package also allowed us to perform slightly better than the linear regression. The test and train rmse are close which we took to be a good sign that we hadn't over or underfitted the data too much. We think our model overall will perform somewhat in the middle of the pack in the class. 
