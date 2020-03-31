@@ -65,7 +65,7 @@ over_tst_pred = ifelse(predict(fit_over, spam_tst) > 0,
                            "spam",
                            "nonspam")
 
-# Create confusion matrices for each
+# Create confusion matrices for eac
 caps_matrix = make_conf_mat(predicted = caps_tst_pred, actual = spam_tst$type)
 mean(caps_tst_pred != spam_tst$type)
 sensitivity(caps_matrix)
