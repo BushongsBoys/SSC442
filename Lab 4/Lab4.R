@@ -84,5 +84,5 @@ specificity(additive_matrix)
 over_matrix = make_conf_mat(predicted = over_tst_pred, actual = spam_tst$type)
 mean(over_tst_pred != spam_tst$type)
 sensitivity(over_matrix)
-specificity(over_matrix)
+specificity(over_matrix) 
 
