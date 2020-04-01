@@ -151,3 +151,62 @@ specificity(over_matrix)
 In making the decision on what is the best model to use, we should first evaluate the overall accuracy of each model using their misclassification rate. Since borht the caps and selected models have relatively high rates (.34 and  .20 respectively), we can eliminate them from discussion. Instead, let's narrow ourselves down to the additive and over models with misclassification rates of .078 abd .156. It may be tempting to pick the additive model from this measure; however there is one additional factor we should still consider. 
 
 In this scenario, it is a much costly error to have actual spam be classified as predicted nonspam since the user will just have to delete the email. On the other hand if actual nonspam is classified as spam, important messages may be lost and the user will have to constantly dig through their spam folder. For this reason, sensitivity and specificity are valuable measures. With this scenario we want low false negatives. Since higher values of false negatives decrease the sensitivity measure, we want to have high sensitivity. Therefore since the sesitivity values for additive and over are .942 and .7898 we should choose the additive method. In another less logical scenario where we cared more about the case where actual spam is classified as nonspam (False positive) we might consider taking the model over since it has a much higher speceficity (.9273 > .8892)
+
+# Excercize 2
+
+```{r}
+bank = read.csv("bank.csv")
+table(bank$y)
+bank_idx = sample(nrow(bank), 4000)
+bank_trn = bank[bank_idx, ]
+bank_tst = bank[-bank_idx, ]
+fit = glm(y ~ age + balance + campaign + previous +loan +duration + housing, data = bank_trn, family = binomial)
+# Run cross fold validation
+set.seed(1)
+cv.glm(bank_trn, fit, K = 10)$delta[1]
+
+bank_pred = ifelse(predict(fit, bank_tst) > 0,
+                       "yes",
+                       "no")
+
+# Create confusion matrices for each
+fit_matrix = make_conf_mat(predicted = bank_pred, actual = bank_tst$y)
+mean(bank_pred != bank_tst$y)
+sensitivity(fit_matrix)
+specificity(fit_matrix)
+summary(fit)
+```
+
+We created a model using age,balance,campaign,previous,loan,duration,housing. It does out perform classifying all observations as the majority case, but it is a somewhat weak model with low sensitivity. Since it has fairly high specificity it could be useful for a marketing campaign since clients predicted postive are very likely to sign with the bank, but it still lets quite a few yes's through the cracks. It would probably be more useful to bias the models predictions upwards and focus on the most likely candidates(even though the model predicts them as no).
+
+The coeefecients on the model are:
+
+Intercept -2.911e+00 This drives the model down, basically it is saying if everything else is 0 we should say this client will not subscribe.
+
+age          5.079e-03  The coeeficent on age is .00078 as people grow older they are slightly more likely to subscribe. This is however not a statistically significant prediction.  
+
+balance      2.473e-05  As balance increased people are slightly more likely to subscribe.
+
+campaign    -9.836e-01  The number of contacts has a fairly strong negative relationship with likelihood to subscribe.
+
+previous      3.757e-01    On the other hand the number of contacts performed before this campaign has a fairly strong positive effect.
+
+duration     8.879e-03  This is the strongest predictor in our data, as duration increases it becomes more and more likely the result will be yes.
+
+housingyes  -7.976e-01  If the person has a housing loan they are significantly less likely to subscribe.
+
+``` {r}
+fit_matrix
+bank_pred = ifelse(predict(fit, bank_tst) > -2,
+                       "yes",
+                       "no")
+
+# Create confusion matrices for each
+fit_matrix = make_conf_mat(predicted = bank_pred, actual = bank_tst$y)
+mean(bank_pred != bank_tst$y)
+sensitivity(fit_matrix)
+specificity(fit_matrix)
+summary(fit)
+fit_matrix
+```
+By biasing up like this I sacrifice specificity for sensitivity, but since a bank is mostly only concerned with people who say yes. I think this is a more valuable model, despite its worse absolute performance. 

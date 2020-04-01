@@ -85,4 +85,25 @@ over_matrix = make_conf_mat(predicted = over_tst_pred, actual = spam_tst$type)
 mean(over_tst_pred != spam_tst$type)
 sensitivity(over_matrix)
 specificity(over_matrix) 
+# Excercise 2
+bank = read.csv("bank.csv")
+table(bank$y)
+bank_idx = sample(nrow(bank), 4000)
+bank_trn = bank[bank_idx, ]
+bank_tst = bank[-bank_idx, ]
+fit = glm(y ~ age + balance + campaign + previous +loan +duration + housing, data = bank_trn, family = binomial)
+# Run cross fold validation
+set.seed(1)
+cv.glm(bank_trn, fit, K = 10)$delta[1]
+
+bank_pred = ifelse(predict(fit, bank_tst) > -1,
+                   "yes",
+                   "no")
+
+# Create confusion matrices for each
+fit_matrix = make_conf_mat(predicted = bank_pred, actual = bank_tst$y)
+mean(bank_pred != bank_tst$y)
+sensitivity(fit_matrix)
+specificity(fit_matrix)
+summary(fit)
 
