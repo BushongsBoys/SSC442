@@ -4,30 +4,19 @@
 library(tidyverse)
 
 # Load NHL Dataset 
-WebsiteTrain <- read.table("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/train.csv",
-                   header = TRUE,
-                   sep = ",", 
-                   na.strings = " ",
-                   fill = TRUE)
+WebsiteTrain <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/train.csv", 
+                         na.strings = c(""," ", "NA" ))
 
+WebsiteTest <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/test.csv",
+                        na.strings = c(""," ", "NA" ))
 
-WebsiteTest <- read.table("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/test.csv",
-                   header = TRUE,
-                   sep = ",", 
-                   na.strings = c("NA","", " "),
-                   fill = TRUE)
-
-Salary <- read.table("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/test_salaries.csv",
-                                header = TRUE,
-                                sep = ",")
+Salary <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/test_salaries.csv")
 
 # Combine salary column to rest of website test 
 WebsiteTest2 <- cbind(Salary, WebsiteTest) 
 
 # Combinde the website split test and train data 
 hockeystats <- rbind(WebsiteTrain, WebsiteTest2)
-
-
 
 # Create our own split of test vs train data 
 set.seed(42)
