@@ -2,6 +2,12 @@
 
 # Load Libraries 
 library(tidyverse)
+library(ggplot2)
+library(caret)
+library(glmnet)
+
+
+######################################### Data Cleaning #################################################
 
 # Load NHL Dataset 
 WebsiteTrain <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/train.csv", 
@@ -18,12 +24,38 @@ WebsiteTest2 <- cbind(Salary, WebsiteTest)
 # Combinde the website split test and train data 
 hockeystats <- rbind(WebsiteTrain, WebsiteTest2)
 
+# NA per column in hockey stats
+sapply(hockeystats, function(x){sum(is.na(x))})
+# Columns with large NA counts: Pr.St, DftYr, DftRd, Ovrl, isDist.1 
+
+# Anyone out of born out of country would not have a providence/stat --> remove this column 
+hockeystats <- hockeystats[, -which(names(hockeystats) %in% "Pr.St")]
+
+# Draft Statistics NA values are result of undrafted players - Solutiuon - Remove draft year and make draft round an imaginary 8 and overall 218 
+hockeystats <- hockeystats[, -which(names(hockeystats) %in% "DftYr")]
+hockeystats$DftRd[is.na(hockeystats$DftRd)] <- 8
+hockeystats$Ovrl[is.na(hockeystats$Ovrl)] <- 218
+
+# Not a lot of use for a second average shot distance variable
+hockeystats <- hockeystats[, -which(names(hockeystats) %in% "sDist.1")]
+
+# Check the rows that have too many NA values and remove the ones that do 
+apply(hockeystats,1, function(x){sum(is.na(x))})
+many_na <- apply(hockeystats,1, function(x){sum(is.na(x)) > 6})
+hockeystats <- hockeystats[-which(many_na),]
+
+# Replace rest of NA values with the mean  
+for(i in 1:ncol(hockeystats)){
+  hockeystats[is.na(hockeystats[,i]), i] <- round(mean(hockeystats[,i], na.rm = TRUE))
+}
+
+############ End of Data Cleaning: Run All code above when doing visuals/modeling ####################
+
 # Create our own split of test vs train data 
 set.seed(42)
-# spam_idx = sample(nrow(spam), round(nrow(spam) / 2))
-hockeystats_idx = sample(nrow(hockeystats), round(nrow(hockeystats)*.75))
+hockeystats_idx = createDataPartition(hockeystats$Salary, p = 0.75, list = FALSE)
 stat_trn = hockeystats[hockeystats_idx, ]
-stat_tst = hockeystats[-hockeystats_idx,]
+stat_tst = hockeystats[-hockeystats_idx, ]
 
 # Start exploring relationships between salary and some predictors we are interested in 
 # Predictors to look at-
@@ -35,6 +67,19 @@ stat_trn_numeric <- Filter(is.numeric, stat_trn)
 
 # Correlative plots of goals, assists, and points
 cormat <- round(cor(stat_trn_numeric, use = "complete.obs"), 2)
+
+# Create a ordinary linear regresssion using train function
+
+# 5 Fold Cross Validation
+set.seed(45)
+cv_5 = trainControl(method = "cv", t)
+
+elastic_regression = train(
+            form = Salary ~ ., 
+            data = stat_trn,
+            method = "glmnet", 
+            trControl = cv_5, 
+)
 
 
 
