@@ -6,7 +6,6 @@ library(ggplot2)
 library(caret)
 library(glmnet)
 
-
 ######################################### Data Cleaning #################################################
 
 # Load NHL Dataset 
@@ -51,11 +50,23 @@ for(i in 1:ncol(hockeystats)){
 
 ############ End of Data Cleaning: Run All code above when doing visuals/modeling ####################
 
+
+
 # Create our own split of test vs train data 
 set.seed(42)
 hockeystats_idx = createDataPartition(hockeystats$Salary, p = 0.75, list = FALSE)
 stat_trn = hockeystats[hockeystats_idx, ]
 stat_tst = hockeystats[-hockeystats_idx, ]
+
+# Functions for later RMSE testing 
+rmse = function(actual, predicted) {
+  sqrt(mean((actual - predicted) ^ 2))
+}
+get_rmse = function(model, data, response) {
+  rmse(actual = subset(data, select = response, drop = TRUE),
+       predicted = predict(model, data))
+}
+
 
 # Start exploring relationships between salary and some predictors we are interested in 
 # Predictors to look at-
@@ -69,17 +80,31 @@ stat_trn_numeric <- Filter(is.numeric, stat_trn)
 cormat <- round(cor(stat_trn_numeric, use = "complete.obs"), 2)
 
 # Create a ordinary linear regresssion using train function
-
 # 5 Fold Cross Validation
 set.seed(45)
-cv_5 = trainControl(method = "cv", t)
+cv_5 = trainControl(method = "cv", 5)
 
-elastic_regression = train(
+best_elastic_regression = train(
             form = Salary ~ ., 
             data = stat_trn,
             method = "glmnet", 
-            trControl = cv_5, 
+            trControl = cv_5 
 )
+
+# For an OLR model with penalized regression 
+get_rmse(best_elastic_regression, stat_trn, 'Salary')
+get_rmse(best_elastic_regression, stat_tst, 'Salary')
+
+# Create an ordinary linear regression model with step function 
+
+
+
+
+
+# Create a KNN model with train 
+
+# Create a Decision Tree model using train 
+
 
 
 
