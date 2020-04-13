@@ -5,7 +5,7 @@ library(tidyverse)
 library(ggplot2)
 library(caret)
 library(glmnet)
-
+#https://www.hockey-reference.com/leagues/NHL_2017_standings.html#site_menu_link
 
 ######################################### Data Cleaning #################################################
 
