@@ -51,6 +51,41 @@ for(i in 1:ncol(hockeystats)){
 
 ############ End of Data Cleaning: Run All code above when doing visuals/modeling ####################
 
+# Create a series of visualizations from our data
+
+# Create a data frame with only the desired variables
+HtSalary1 <- hockeystats %>% select(Ht, Position, Salary)
+
+# Assign a new varaible identifying all the Offesive and Defensive position types
+HtSalary1 <- HtSalary1 %>%
+  mutate(Pos = ifelse(Position != "D", "Offensive Player",
+                    ifelse(Position == "D", "Defensive Player", NA)))
+
+# Group by Height and Position while summarising average salary in millions
+HtSalary = HtSalary1 %>% 
+  group_by(Ht, Pos) %>% 
+  summarise(AvgSalaryInMillions = mean(Salary)/1000000)
+
+# Create a bar plot with the Height and Average Salary variables
+HtSalaryPlot <- ggplot(
+  data=HtSalary, # data object 
+  aes(
+    x=Ht, # x aesthetic 
+    y=AvgSalaryInMillions, # y aesthetic
+  )
+) + 
+  labs(
+    x='Player Height(Inches)',
+    y='Average Salary (Millions)',
+    title="Average Salary by Player Height"
+  ) +
+  theme_minimal()+
+  theme(
+    axis.ticks=element_blank(),
+    legend.position = 'top') +
+  facet_wrap(~Pos) +
+  geom_bar(stat='identity', fill="steelblue")
+HtSalaryPlot
 
 
 # Create our own split of test vs train data 
