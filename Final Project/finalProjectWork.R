@@ -53,6 +53,9 @@ for(i in 1:ncol(hockeystats)){
 
 # Create a series of visualizations from our data
 
+
+# Visual 1
+
 # Create a data frame with only the desired variables
 HtSalary1 <- hockeystats %>% select(Ht, Position, Salary)
 
@@ -86,6 +89,46 @@ HtSalaryPlot <- ggplot(
   facet_wrap(~Pos) +
   geom_bar(stat='identity', fill="steelblue")
 HtSalaryPlot
+
+# Visual 2
+
+#Create a data frame with only the desired variables
+AgeSalary <- hockeystats %>% select(Salary, Born)
+
+#Add a Age variable calculated from the birth date variable
+AgeSalary$Born <- as.Date(AgeSalary$Born)
+AgeSalary$Age <- age_calc(AgeSalary$Born, enddate = Sys.Date(), units = "years", precise = TRUE)
+AgeSalary$Age <- (AgeSalary$Age-1900)
+AgeSalary$Age <- round(AgeSalary$Age, 0)
+AgeSalary <- AgeSalary %>% filter(Age < 75)
+
+
+#Group the data by age and summarise by average salary
+AgeSalary = AgeSalary %>% 
+  group_by(Age) %>% 
+  summarise(AvgSalaryInMillions = mean(Salary)/1000000)
+
+
+#Create a line plot with the age and average salary variables
+AgeSalaryPlot <- ggplot(
+  data=AgeSalary, # data object 
+  aes(
+    x=Age, # x aesthetic 
+    y=AvgSalaryInMillions, # y aesthetic
+  )
+) + 
+  labs(
+    x='Player Age(Years)',
+    y='Average Salary (Millions)',
+    title="Average Salary by Player Age"
+  ) +
+  theme_minimal()+
+  theme(
+    axis.ticks=element_blank(),
+    legend.position = 'top') +
+  geom_line(stat='identity', color="steelblue")
+AgeSalaryPlot
+
 
 
 # Create our own split of test vs train data 
