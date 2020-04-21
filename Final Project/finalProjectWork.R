@@ -136,7 +136,22 @@ AgeSalaryPlot <- ggplot(
   geom_line(stat='identity', color="steelblue")
 AgeSalaryPlot
 
+## Visual 3
 
+CntrySalary <- hockeystats %>% select(Cntry, Salary)
+CntrySalary <- CntrySalary %>%
+  group_by(Cntry) %>%
+  summarise(Salary = mean(Salary)/1000000)
+
+CntrySalaryPlot<-ggplot(data=CntrySalary, aes(x=Cntry, y=Salary)) +
+  geom_bar(stat="identity", color="steelblue", width = .8) +
+  labs(
+    x='Players Country',
+    y='Average Salary (Millions)',
+    title="Average Salary by Country") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.ticks=element_blank())
+CntrySalaryPlot
 
 # Functions for later RMSE testing 
 rmse = function(actual, predicted) {
