@@ -5,8 +5,11 @@ library(tidyverse)
 library(ggplot2)
 library(caret)
 library(glmnet)
+library(randomForest)
+
 #https://www.hockey-reference.com/leagues/NHL_2017_standings.html#site_menu_link
 #https://www.capfriendly.com/
+
 ######################################### Data Cleaning #################################################
 
 # Load NHL Dataset 
@@ -131,12 +134,6 @@ AgeSalaryPlot
 
 
 
-# Create our own split of test vs train data 
-set.seed(42)
-hockeystats_idx = createDataPartition(hockeystats$Salary, p = 0.75, list = FALSE)
-stat_trn = hockeystats[hockeystats_idx, ]
-stat_tst = hockeystats[-hockeystats_idx, ]
-
 # Functions for later RMSE testing 
 rmse = function(actual, predicted) {
   sqrt(mean((actual - predicted) ^ 2))
@@ -147,42 +144,39 @@ get_rmse = function(model, data, response) {
 }
 
 
-# Start exploring relationships between salary and some predictors we are interested in 
-# Predictors to look at-
-# Obvious: Position: Goals, Assists, Points 
-# Non-obvious: Draft/Draft Overall, Games Played, +/-, Penalty minutes, Position
-
-# Remove any non-numeric variables for data exploration purposes only
-stat_trn_numeric <- Filter(is.numeric, stat_trn)
-
-# Correlative plots of goals, assists, and points
-cormat <- round(cor(stat_trn_numeric, use = "complete.obs"), 2)
-
-# Create a ordinary linear regresssion using train function
-# 5 Fold Cross Validation
-set.seed(45)
-cv_5 = trainControl(method = "cv", 5)
-
-best_elastic_regression = train(
-            form = Salary ~ ., 
-            data = stat_trn,
-            method = "glmnet", 
-            trControl = cv_5 
-)
-
-# For an OLR model with penalized regression 
-get_rmse(best_elastic_regression, stat_trn, 'Salary')
-get_rmse(best_elastic_regression, stat_tst, 'Salary')
-
-# Create an ordinary linear regression model with step function 
 
 
+## Create a Ordinary Linear Regression Model 
+
+# For Regression purposes we will do additional data cleaning and explainations 
+
+# Remove Catagorical Data with large number of levels that have seemingly no impact on salary 
+# Catagories Removed: Born, City, Last Name, First Name, Last Name, Team, Nat (Since similar to country)
+# Team might have an impact on how much the player gets paid, but we are interested in a market value hughes is worth, so it was also excluded
+regressionStats <- hockeystats[, -which(names(hockeystats) %in% c("Born", "City", "Last.Name", "First.Name", "Team", "Nat"))]
 
 
+# Create our own split of test vs train data 
+set.seed(42)
+hockeystats_idx = createDataPartition(regressionStats$Salary, p = 0.75, list = FALSE)
+stat_trn = regressionStats[hockeystats_idx, ]
+stat_tst = regressionStats[-hockeystats_idx, ]
 
-# Create a KNN model with train 
+# Create a random forrest to locate important vairables and make an plot for it
+salaryForest <- randomForest(Salary ~ ., data = stat_trn, mtry = 144, importance = TRUE, ntree = 500 )
+importance(salaryForest, type = 1)
+varImpPlot(salaryForest, sort = TRUE, n.var = 15, type = 1)
 
-# Create a Decision Tree model using train 
+# Use step function to find other important variables to include in lenear model 
+# Forward selection process 
+nullModel <- lm(Salary ~ 1, data = stat_trn)
+fullModel <- lm(Salary ~ ., data = stat_trn)
+
+# Detects the variable to add to the null model that results in the lowest RSS 
+step(nullModel, direction = "forward", scope = formula(fullModel))
+
+
+roughModel <- lm(Salary ~ , data = stat_trn)
 
 
 
