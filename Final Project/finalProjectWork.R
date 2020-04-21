@@ -138,12 +138,6 @@ AgeSalaryPlot
 rmse = function(actual, predicted) {
   sqrt(mean((actual - predicted) ^ 2))
 }
-get_rmse = function(model, data, response) {
-  rmse(actual = subset(data, select = response, drop = TRUE),
-       predicted = predict(model, data))
-}
-
-
 
 
 ## Create a Ordinary Linear Regression Model 
@@ -151,10 +145,19 @@ get_rmse = function(model, data, response) {
 # For Regression purposes we will do additional data cleaning and explainations 
 
 # Remove Catagorical Data with large number of levels that have seemingly no impact on salary 
-# Catagories Removed: Born, City, Last Name, First Name, Last Name, Team, Nat (Since similar to country)
+# Catagories Removed: Born, City, Last Name, First Name, Last Name, Team, Nat, Cntry
 # Team might have an impact on how much the player gets paid, but we are interested in a market value hughes is worth, so it was also excluded
-regressionStats <- hockeystats[, -which(names(hockeystats) %in% c("Born", "City", "Last.Name", "First.Name", "Team", "Nat"))]
+regressionStats <- hockeystats[, -which(names(hockeystats) %in% c("Born", "City", "Last.Name", "First.Name", "Team", "Nat", "Cntry"))]
 
+# Change the positions assignments to Forward or Defence (F or D)
+regressionStats$Position <- factor(regressionStats$Position, levels = c(levels(regressionStats$Position), "F"))
+regressionStats$Position[
+      which(regressionStats$Position %in% c("C", "C/D", "C/LW", "C/LW/RW", "C/RW", "C/RW/LW","LW/C", "LW", "LW/C/RW", "LW/RW", "LW/RW/C", "RW", "RW/C", "RW/C/LW", "RW/LW", "RW/LW/C", "C/LW/C"))] <- "F"
+
+regressionStats$Position[
+  which(regressionStats$Position %in% c("D", "D/LW","D/RW"))] <- "D"
+
+str(droplevels(regressionStats))
 
 # Create our own split of test vs train data 
 set.seed(42)
@@ -162,8 +165,9 @@ hockeystats_idx = createDataPartition(regressionStats$Salary, p = 0.75, list = F
 stat_trn = regressionStats[hockeystats_idx, ]
 stat_tst = regressionStats[-hockeystats_idx, ]
 
+
 # Create a random forrest to locate important vairables and make an plot for it
-salaryForest <- randomForest(Salary ~ ., data = stat_trn, mtry = 144, importance = TRUE, ntree = 500 )
+salaryForest <- randomForest(Salary ~ ., data = stat_trn, mtry = 143, importance = TRUE, ntree = 500 )
 importance(salaryForest, type = 1)
 varImpPlot(salaryForest, sort = TRUE, n.var = 15, type = 1)
 
@@ -175,11 +179,44 @@ fullModel <- lm(Salary ~ ., data = stat_trn)
 # Detects the variable to add to the null model that results in the lowest RSS 
 step(nullModel, direction = "forward", scope = formula(fullModel))
 
+# Include variables from max step function 
+Best_Model <-lm(formula = Salary ~ xGF + iHA + FOW + TKA + Wt + HF + FOL + 
+                  iHDf + TOI.GP.1 + Position + NPD + Ht + ozFOW + FOL.Up + 
+                  GVA + E... + TOI. + DSF + S.Slap + DPS + iTKA + iHF + Match + 
+                  Game + S.Dflct + Shifts + HA + iSCF + iDS + iCF + G + iFF + 
+                  TOI.GP + PTS + OPS + GP + GS + iBLK.1 + GS.G + Ovrl + PENT + A + A1 + A2 + Shifts +
+                  TOI, data = stat_trn)
 
-roughModel <- lm(Salary ~ , data = stat_trn)
+Test_Model <- lm(formula = Salary ~ xGF + iHA + FOW + TKA + Wt + HF + FOL + 
+                   iHDf + TOI.GP.1 + Position + NPD + Ht + ozFOW + FOL.Up + 
+                   GVA + E... + TOI. + DSF + S.Slap + DPS + iTKA + iHF + Match + 
+                   Game + S.Dflct + Shifts + HA + iSCF + iDS + iCF + G + iFF + 
+                   TOI.GP + PTS + OPS + GP + GS + iBLK.1 + GS.G + Ovrl + PENT + A + A1 + A2 + Shifts +
+                   TOI, data = stat_trn)
+
+predict1 <- predict(Best_Model, stat_trn)
+predict2 <- predict(Best_Model, stat_tst)
+predict3 <- predict(Test_Model, stat_tst)
+rmse(stat_trn$Salary, predict1)
+rmse(stat_tst$Salary, predict2)
+rmse(stat_tst$Salary, predict3)
+
+set.seed(45)
+cv_5 = trainControl(method = "cv", 5)
 
 
-
+best_elastic_regression = train(
+    form = Salary ~ ., 
+    data = stat_trn,
+    method = "glmnet", 
+    trControl = cv_5, 
+    tuneLength = 250
+  )
+  
+predict5 <- predict(best_elastic_regression, stat_trn)
+predict6 <- predict(best_elastic_regression, stat_tst)
+rmse(stat_trn$Salary, predict5)
+rmse(stat_tst$Salary, predict6)
 
 
 
