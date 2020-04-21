@@ -31,6 +31,10 @@ hockeystats <- rbind(WebsiteTrain, WebsiteTest2)
 sapply(hockeystats, function(x){sum(is.na(x))})
 # Columns with large NA counts: Pr.St, DftYr, DftRd, Ovrl, isDist.1 
 
+# Remove rookies who are on entry level contracts(2014,2015,2016)
+isRookie <- apply(hockeystats,1, function(x){hockeystats$DftYr > 2014})
+hockeystats <- hockeystats[-which(isRookie),]
+
 # Anyone out of born out of country would not have a providence/stat --> remove this column 
 hockeystats <- hockeystats[, -which(names(hockeystats) %in% "Pr.St")]
 
@@ -169,7 +173,7 @@ stat_tst = regressionStats[-hockeystats_idx, ]
 # Create a random forrest to locate important vairables and make an plot for it
 salaryForest <- randomForest(Salary ~ ., data = stat_trn, mtry = 143, importance = TRUE, ntree = 500 )
 importance(salaryForest, type = 1)
-varImpPlot(salaryForest, sort = TRUE, n.var = 15, type = 1)
+varImpPlot(salaryForest, sort = TRUE, n.var = 20, type = 1)
 
 # Use step function to find other important variables to include in lenear model 
 # Forward selection process 
@@ -180,7 +184,7 @@ fullModel <- lm(Salary ~ ., data = stat_trn)
 step(nullModel, direction = "forward", scope = formula(fullModel))
 
 # Include variables from max step function 
-Best_Model <-lm(formula = Salary ~ xGF + iHA + FOW + TKA + Wt + HF + FOL + 
+Best_Model <- lm(formula = Salary ~ xGF + iHA + FOW + TKA + Wt + HF + FOL + 
                   iHDf + TOI.GP.1 + Position + NPD + Ht + ozFOW + FOL.Up + 
                   GVA + E... + TOI. + DSF + S.Slap + DPS + iTKA + iHF + Match + 
                   Game + S.Dflct + Shifts + HA + iSCF + iDS + iCF + G + iFF + 
@@ -192,7 +196,9 @@ Test_Model <- lm(formula = Salary ~ xGF + iHA + FOW + TKA + Wt + HF + FOL +
                    GVA + E... + TOI. + DSF + S.Slap + DPS + iTKA + iHF + Match + 
                    Game + S.Dflct + Shifts + HA + iSCF + iDS + iCF + G + iFF + 
                    TOI.GP + PTS + OPS + GP + GS + iBLK.1 + GS.G + Ovrl + PENT + A + A1 + A2 + Shifts +
-                   TOI, data = stat_trn)
+                   TOI + X... + PIM + IPP. + Diff + iRS  + iHF  + iBLK + ozFOL + GWG +  G.Tip +
+                   Over + S.Tip  + Min + Misc+  FF + SF+ GF + GA + RBA +
+                    OTOI  + GS.G, data = stat_trn)
 
 predict1 <- predict(Best_Model, stat_trn)
 predict2 <- predict(Best_Model, stat_tst)
@@ -210,7 +216,7 @@ best_elastic_regression = train(
     data = stat_trn,
     method = "glmnet", 
     trControl = cv_5, 
-    tuneLength = 250
+    tuneLength = 10
   )
   
 predict5 <- predict(best_elastic_regression, stat_trn)
