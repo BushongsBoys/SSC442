@@ -43,6 +43,9 @@ hockeystats <- hockeystats[, -which(names(hockeystats) %in% "DftYr")]
 hockeystats$DftRd[is.na(hockeystats$DftRd)] <- 8
 hockeystats$Ovrl[is.na(hockeystats$Ovrl)] <- 218
 
+# Remove injured players who were injured for a large portion of the season(taking into account salary)
+hockeystats <- hockeystats[-which(hockeystats$Last.Name %in% c("Stamkos", "Myers", "Huberdeau","MacArthur", "Despres", "Stoner", "Dorsett", "Richardson", "Hemsky", "Callahan" )),]
+
 # Not a lot of use for a second average shot distance variable
 hockeystats <- hockeystats[, -which(names(hockeystats) %in% "sDist.1")]
 
@@ -168,6 +171,13 @@ rmse = function(actual, predicted) {
 # Team might have an impact on how much the player gets paid, but we are interested in a market value hughes is worth, so it was also excluded
 regressionStats <- hockeystats[, -which(names(hockeystats) %in% c("Born", "City", "Last.Name", "First.Name", "Team", "Nat", "Cntry"))]
 
+# Remove all Faceoff Data since it only applies to centers 
+regressionStats <- regressionStats[, -which(names(regressionStats) %in% c("iFOW", "iFOL", "iFOW.1", "iFOL.1", "FO.", "X.FOT", "dzFOW", "dzFOL", "nzFOW", "nzFOL", "ozFOW", "ozFOL",  "FOW.Up", "FOL.Up", "FOW.Down", "FOL.Down", "FOW.Close", "FOL.Close"))]
+
+# Remove all variables where there are two of them sDist and sDist.1 for example 
+regressionStats <- regressionStats <- regressionStats[, -which(names(regressionStats) %in% c("TOI.GP.1", "iCF.1", "iSF.1", "iSF.2", "iHF.1", "iGVA.1", "iTKA.1", "iBLK.1"))]
+
+
 # Change the positions assignments to Forward or Defence (F or D)
 regressionStats$Position <- factor(regressionStats$Position, levels = c(levels(regressionStats$Position), "F"))
 regressionStats$Position[
@@ -186,9 +196,11 @@ stat_tst = regressionStats[-hockeystats_idx, ]
 
 
 # Create a random forrest to locate important vairables and make an plot for it
-salaryForest <- randomForest(Salary ~ ., data = stat_trn, mtry = 143, importance = TRUE, ntree = 500 )
+salaryForest <- randomForest(Salary ~ ., data = stat_trn, mtry = 117, importance = TRUE, ntree = 500 )
 importance(salaryForest, type = 1)
 varImpPlot(salaryForest, sort = TRUE, n.var = 20, type = 1)
+predictrf <- predict(salaryForest, stat_tst)
+rmse(stat_tst$Salary, predictrf)
 
 # Use step function to find other important variables to include in lenear model 
 # Forward selection process 
@@ -198,33 +210,9 @@ fullModel <- lm(Salary ~ ., data = stat_trn)
 # Detects the variable to add to the null model that results in the lowest RSS 
 step(nullModel, direction = "forward", scope = formula(fullModel))
 
-# Include variables from max step function 
-Best_Model <- lm(formula = Salary ~ xGF + iHA + FOW + TKA + Wt + HF + FOL + 
-                  iHDf + TOI.GP.1 + Position + NPD + Ht + ozFOW + FOL.Up + 
-                  GVA + E... + TOI. + DSF + S.Slap + DPS + iTKA + iHF + Match + 
-                  Game + S.Dflct + Shifts + HA + iSCF + iDS + iCF + G + iFF + 
-                  TOI.GP + PTS + OPS + GP + GS + iBLK.1 + GS.G + Ovrl + PENT + A + A1 + A2 + Shifts +
-                  TOI, data = stat_trn)
-
-Test_Model <- lm(formula = Salary ~ xGF + iHA + FOW + TKA + Wt + HF + FOL + 
-                   iHDf + TOI.GP.1 + Position + NPD + Ht + ozFOW + FOL.Up + 
-                   GVA + E... + TOI. + DSF + S.Slap + DPS + iTKA + iHF + Match + 
-                   Game + S.Dflct + Shifts + HA + iSCF + iDS + iCF + G + iFF + 
-                   TOI.GP + PTS + OPS + GP + GS + iBLK.1 + GS.G + Ovrl + PENT + A + A1 + A2 + Shifts +
-                   TOI + X... + PIM + IPP. + Diff + iRS  + iHF  + iBLK + ozFOL + GWG +  G.Tip +
-                   Over + S.Tip  + Min + Misc+  FF + SF+ GF + GA + RBA +
-                    OTOI  + GS.G, data = stat_trn)
-
-predict1 <- predict(Best_Model, stat_trn)
-predict2 <- predict(Best_Model, stat_tst)
-predict3 <- predict(Test_Model, stat_tst)
-rmse(stat_trn$Salary, predict1)
-rmse(stat_tst$Salary, predict2)
-rmse(stat_tst$Salary, predict3)
 
 set.seed(45)
 cv_5 = trainControl(method = "cv", 5)
-
 
 best_elastic_regression = train(
     form = Salary ~ ., 
