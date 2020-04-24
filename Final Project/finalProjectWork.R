@@ -6,6 +6,7 @@ library(ggplot2)
 library(caret)
 library(glmnet)
 library(randomForest)
+library(xgboost)
 
 #https://www.hockey-reference.com/leagues/NHL_2017_standings.html#site_menu_link
 #https://www.capfriendly.com/
@@ -238,48 +239,11 @@ regressionStats$Position[
 str(droplevels(regressionStats))
 
 
-# Create logistic transformation 
-factordata <- regressionStats[,-which(names(regressionStats) %in% c("G", "A", "A1", "A2", "PTS", "PIM","iCF", "iCF.1", "iFF", "iSF", "iSF.1", "iSF.2", "ixG", "iSCF", "iRB", "iRS", "iRS", "iGVA", "iTKA", "iBLK", "iGVA.1", "iTKA.1", "OTG", "X1G", "GWG", "ENG", "PSG", "PSA", "G.Bkhd", "G.Dflct", "G.Slap", "G.Snap", "G.Tip", "G.Wrap", "G.Wrst","Over", "Wide", "S.Bkhd", "S.Dflct", "S.Slap", "S.Snap", "S.Tip", "S.Wrap", "Maj", "Match", "Misc", "Game", "CF", "DPS", "OPS", "PS"  ))]
-numericdata <- regressionStats[,which(names(regressionStats) %in% c("G", "A", "A1", "A2", "PTS", "PIM","iCF", "iCF.1", "iFF", "iSF", "iSF.1", "iSF.2", "ixG", "iSCF", "iRB", "iRS", "iRS", "iGVA", "iTKA", "iBLK", "iGVA.1", "iTKA.1", "OTG", "X1G", "GWG", "ENG", "PSG", "PSA", "G.Bkhd", "G.Dflct", "G.Slap", "G.Snap", "G.Tip", "G.Wrap", "G.Wrst","Over", "Wide", "S.Bkhd", "S.Dflct", "S.Slap", "S.Snap", "S.Tip", "S.Wrap", "Maj", "Match", "Misc", "Game", "CF", "DPS", "OPS", "PS"  ))]
-logdata <- sign(numericdata)*(abs(numericdata))^(1/3)
-logdata <- cbind(factordata, logdata)
-logdata <- as.data.frame(logdata)
-
-salaryDist <- ggplot(hockeystats, aes(x= )) + 
-  geom_density(aes(y = ..count..), fill = "lightgray") +
-  geom_vline(aes(xintercept = mean(DPS)), 
-             linetype = "dashed", size = 0.6,
-             color = "#FC4E07")
-
-Goaldist <- ggplot(logdata, aes(x= G)) + 
-  geom_density(aes(y = ..count..), fill = "lightgray") +
-  geom_vline(aes(xintercept = mean(G)), 
-             linetype = "dashed", size = 0.6,
-             color = "#FC4E07")
-
-set.seed(42)
-hockeystats_idx = createDataPartition(logdata$Salary, p = 0.75, list = FALSE)
-stat_trn = logdata[hockeystats_idx, ]
-stat_tst = logdata[-hockeystats_idx, ]
-
-
-# Create a split between forward and defence 
-defenceregression <- regressionStats[which(regressionStats$Position %in% "D"),]
-
 # Create our own split of test vs train data 
 set.seed(42)
 hockeystats_idx = createDataPartition(regressionStats$Salary, p = 0.75, list = FALSE)
 stat_trn = regressionStats[hockeystats_idx, ]
 stat_tst = regressionStats[-hockeystats_idx, ]
-
-# Create a split between forward and defence 
-defenceregression <- regressionStats[which(regressionStats$Position %in% "D"),]
-
-# Create Split of Defence Data
-set.seed(42)
-defence_idx = createDataPartition(defenceregression$Salary, p = 0.6, list = FALSE)
-defence_trn = defenceregression[defence_idx, ]
-defence_tst = defenceregression[-defence_idx, ]
 
 
 # Create a random forrest to locate important vairables and make an plot for it
@@ -301,7 +265,7 @@ step(nullModel, direction = "forward", scope = formula(fullModel))
 set.seed(45)
 cv_5 = trainControl(method = "cv", 5)
 
-best_elastic_regression2 = train(
+best_elastic_regression = train(
     form = Salary ~ ., 
     data = stat_trn,
     method = "glmnet", 
@@ -309,13 +273,7 @@ best_elastic_regression2 = train(
     tuneLength = 10
   )
 
-best_elastic_regression = train(
-  form = Salary ~ ., 
-  data = stat_trn,
-  method = "knn", 
-  trControl = cv_5
-)
-  
+
 predict5 <- predict(best_elastic_regression, stat_trn)
 predict6 <- predict(best_elastic_regression, stat_tst)
 rmse(stat_trn$Salary, predict5)
@@ -329,8 +287,53 @@ plotSet <-  cbind(residuals, stat_tst)
 residualsOnSalary <- ggplot(data = plotSet, aes(x=Salary, y= residuals, color= Position))+
   geom_point()
 
-# Create a dataframe with predicted, actual, and residuals in real terms
-Salaryinfo <- data.frame("Actual"= (stat_tst$Salary)^(1/3), "Predicted" = (predict6)^(1/3))
 
+# Using gradient boosted trees 
+set.seed(123)
+model <- train(
+  Salary ~ Position + Ovrl + iBLK  + TOI + GP + xGF + Shifts + S.Wrst + S.Slap + CF + ixG + iTKA+ A
+  + E... + iCF + G + PTS + PS + PIM + GWG + G, 
+  data = stat_trn, 
+  method = "xgbTree",
+  trControl = trainControl("cv", number = 10)
+)
+
+predict5 <- predict(model, stat_trn)
+predict6 <- predict(model, stat_tst)
+rmse(stat_trn$Salary, predict5)
+rmse(stat_tst$Salary, predict6)
+
+
+# Calculate residuals on test data and create a dataframe with the two
+residuals <- stat_tst$Salary - predict6
+plotSet <-  cbind(residuals, stat_tst)
+
+residualsOnSalary <- ggplot(data = plotSet, aes(x=Salary, y= residuals, color= Position))+
+  geom_point()
+
+
+# KNN observations 
+set.seed(123)
+model2 <- train(
+  Salary ~ Position + Ovrl + iBLK  + TOI + GP + xGF + Shifts + S.Wrst + S.Slap + CF + ixG + iTKA+ A
+  + E... + iCF + G + PTS + PS + PIM + GWG + G, 
+  data = stat_trn, 
+  method = "knn",
+  trControl = trainControl("cv", number = 10), 
+  tuneLength = 20
+)
+
+predict5 <- predict(model2, stat_trn)
+predict6 <- predict(model2, stat_tst)
+rmse(stat_trn$Salary, predict5)
+rmse(stat_tst$Salary, predict6)
+
+
+# Calculate residuals on test data and create a dataframe with the two
+residuals <- stat_tst$Salary - predict6
+plotSet <-  cbind(residuals, stat_tst)
+
+residualsOnSalary <- ggplot(data = plotSet, aes(x=Salary, y= residuals, color= Position))+
+  geom_point()
 
 
