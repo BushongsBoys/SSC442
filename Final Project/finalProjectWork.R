@@ -6,6 +6,7 @@ library(ggplot2)
 library(caret)
 library(glmnet)
 library(randomForest)
+library(xgboost)
 
 #https://www.hockey-reference.com/leagues/NHL_2017_standings.html#site_menu_link
 #https://www.capfriendly.com/
@@ -21,7 +22,11 @@ WebsiteTest <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/m
 
 Salary <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/test_salaries.csv")
 
+
 Records <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/records.csv")
+
+
+quinnHughes <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/quinnHughes.csv")
 
 # Combine salary column to rest of website test 
 WebsiteTest2 <- cbind(Salary, WebsiteTest) 
@@ -64,6 +69,54 @@ for(i in 1:ncol(hockeystats)){
 ############ End of Data Cleaning: Run All code above when doing visuals/modeling ####################
 
 # Create a series of visualizations from our data
+
+# Distribution Exploration 
+salaryDist <- ggplot(hockeystats, aes(x= Salary)) + 
+  geom_density(aes(y = ..count..), fill = "lightgray") +
+  geom_vline(aes(xintercept = mean(Salary)), 
+             linetype = "dashed", size = 0.6,
+             color = "#FC4E07")
+
+Goaldist <- ggplot(hockeystats, aes(x= G)) + 
+  geom_density(aes(y = ..count..), fill = "lightgray") +
+  geom_vline(aes(xintercept = mean(G)), 
+             linetype = "dashed", size = 0.6,
+             color = "#FC4E07")
+
+newstat <- hockeystats[-which(hockeystats$Salary < 1000000),]
+salaryDist <- ggplot(hockeystats, aes(x= Salary)) + 
+  geom_density(aes(y = ..count..), fill = "lightgray") +
+  geom_vline(aes(xintercept = mean(Salary)), 
+             linetype = "dashed", size = 0.6,
+             color = "#FC4E07")
+
+
+TOIDist <- ggplot(hockeystats, aes(x= TOIX)) + 
+  geom_density(aes(y = ..count..), fill = "lightgray") +
+  geom_vline(aes(xintercept = mean(TOIX)), 
+             linetype = "dashed", size = 0.6,
+             color = "#FC4E07")
+
+Shiftdist <- ggplot(hockeystats, aes(x= Shifts)) + 
+  geom_density(aes(y = ..count..), fill = "lightgray") +
+  geom_vline(aes(xintercept = mean(Shifts)), 
+             linetype = "dashed", size = 0.6,
+             color = "#FC4E07")
+
+ShiftOvrl <- ggplot(hockeystats, aes(x= Ovrl)) + 
+  geom_density(aes(y = ..count..), fill = "lightgray") +
+  geom_vline(aes(xintercept = mean(Ovrl)), 
+             linetype = "dashed", size = 0.6,
+             color = "#FC4E07")
+
+DftRdOvrl <- ggplot(hockeystats, aes(x= DftRd)) + 
+  geom_density(aes(y = ..count..), fill = "lightgray") +
+  geom_vline(aes(xintercept = mean(DftRd)), 
+             linetype = "dashed", size = 0.6,
+             color = "#FC4E07")
+
+
+# From this we can conclude that most of our numeric 
 
 
 # Visual 1
@@ -174,11 +227,10 @@ rmse = function(actual, predicted) {
 regressionStats <- hockeystats[, -which(names(hockeystats) %in% c("Born", "City", "Last.Name", "First.Name", "Team", "Nat", "Cntry"))]
 
 # Remove all Faceoff Data since it only applies to centers 
-regressionStats <- regressionStats[, -which(names(regressionStats) %in% c("iFOW", "iFOL", "iFOW.1", "iFOL.1", "FO.", "X.FOT", "dzFOW", "dzFOL", "nzFOW", "nzFOL", "ozFOW", "ozFOL",  "FOW.Up", "FOL.Up", "FOW.Down", "FOL.Down", "FOW.Close", "FOL.Close"))]
+regressionStats <- regressionStats[, -which(names(regressionStats) %in% c("iFOW", "CBar", "Post", "iFOL", "iFOW.1", "iFOL.1", "FO.", "X.FOT", "dzFOW", "dzFOL", "nzFOW", "nzFOL", "ozFOW", "ozFOL",  "FOW.Up", "FOL.Up", "FOW.Down", "FOL.Down", "FOW.Close", "FOL.Close"))]
 
 # Remove all variables where there are two of them sDist and sDist.1 for example 
-regressionStats <- regressionStats <- regressionStats[, -which(names(regressionStats) %in% c("TOI.GP.1", "iCF.1", "iSF.1", "iSF.2", "iHF.1", "iGVA.1", "iTKA.1", "iBLK.1"))]
-
+regressionStats <- regressionStats[, -which(names(regressionStats) %in% c("FOW", "FOL", "SH.", "SV." ,"TOI.GP.1", "iCF.1", "iSF.1", "iSF.2", "iHF.1", "iGVA.1", "iTKA.1", "iBLK.1"))]
 
 # Change the positions assignments to Forward or Defence (F or D)
 regressionStats$Position <- factor(regressionStats$Position, levels = c(levels(regressionStats$Position), "F"))
@@ -190,6 +242,7 @@ regressionStats$Position[
 
 str(droplevels(regressionStats))
 
+
 # Create our own split of test vs train data 
 set.seed(42)
 hockeystats_idx = createDataPartition(regressionStats$Salary, p = 0.75, list = FALSE)
@@ -198,7 +251,7 @@ stat_tst = regressionStats[-hockeystats_idx, ]
 
 
 # Create a random forrest to locate important vairables and make an plot for it
-salaryForest <- randomForest(Salary ~ ., data = stat_trn, mtry = 117, importance = TRUE, ntree = 500 )
+salaryForest <- randomForest(Salary ~ ., data = stat_trn, mtry = 111, importance = TRUE, ntree = 500 )
 importance(salaryForest, type = 1)
 varImpPlot(salaryForest, sort = TRUE, n.var = 20, type = 1)
 predictrf <- predict(salaryForest, stat_tst)
@@ -223,7 +276,8 @@ best_elastic_regression = train(
     trControl = cv_5, 
     tuneLength = 10
   )
-  
+
+
 predict5 <- predict(best_elastic_regression, stat_trn)
 predict6 <- predict(best_elastic_regression, stat_tst)
 rmse(stat_trn$Salary, predict5)
@@ -243,3 +297,61 @@ model1 = lm(Records$W~Records$CAP)
 model2 = lm(W~CAP + Stars, Records)
 summary(model1)
 summary(model2)
+
+# Calculate residuals on test data and create a dataframe with the two
+residuals <- stat_tst$Salary - predict6
+plotSet <-  cbind(residuals, stat_tst)
+
+residualsOnSalary <- ggplot(data = plotSet, aes(x=Salary, y= residuals, color= Position))+
+  geom_point()
+
+
+# Using gradient boosted trees 
+set.seed(123)
+model <- train(
+  Salary ~ Position + Ovrl + iBLK  + TOI + GP + xGF + Shifts + S.Wrst + S.Slap + CF + ixG + iTKA+ A
+  + E... + iCF + G + PTS + PS + PIM + GWG + G, 
+  data = stat_trn, 
+  method = "xgbTree",
+  trControl = trainControl("cv", number = 10)
+)
+
+predict5 <- predict(model, stat_trn)
+predict6 <- predict(model, stat_tst)
+rmse(stat_trn$Salary, predict5)
+rmse(stat_tst$Salary, predict6)
+
+
+# Calculate residuals on test data and create a dataframe with the two
+residuals <- stat_tst$Salary - predict6
+plotSet <-  cbind(residuals, stat_tst)
+
+residualsOnSalary <- ggplot(data = plotSet, aes(x=Salary, y= residuals, color= Position))+
+  geom_point()
+
+
+# KNN observations 
+set.seed(123)
+model2 <- train(
+  Salary ~ Position + Ovrl + iBLK  + TOI + GP + xGF + Shifts + S.Wrst + S.Slap + CF + ixG + iTKA+ A
+  + E... + iCF + G + PTS + PS + PIM + GWG + G, 
+  data = stat_trn, 
+  method = "knn",
+  trControl = trainControl("cv", number = 10), 
+  tuneLength = 20
+)
+
+predict5 <- predict(model2, stat_trn)
+predict6 <- predict(model2, stat_tst)
+rmse(stat_trn$Salary, predict5)
+rmse(stat_tst$Salary, predict6)
+
+
+# Calculate residuals on test data and create a dataframe with the two
+residuals <- stat_tst$Salary - predict6
+plotSet <-  cbind(residuals, stat_tst)
+
+residualsOnSalary <- ggplot(data = plotSet, aes(x=Salary, y= residuals, color= Position))+
+  geom_point()
+
+
