@@ -21,6 +21,8 @@ WebsiteTest <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/m
 
 Salary <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/test_salaries.csv")
 
+Records <- read.csv("https://raw.githubusercontent.com/BushongsBoys/SSC442/master/Final%20Project/Data/records.csv")
+
 # Combine salary column to rest of website test 
 WebsiteTest2 <- cbind(Salary, WebsiteTest) 
 
@@ -227,5 +229,17 @@ predict6 <- predict(best_elastic_regression, stat_tst)
 rmse(stat_trn$Salary, predict5)
 rmse(stat_tst$Salary, predict6)
 
+plot(Records$CAP, Records$W, pch = 16, cex = 1.3, col = "blue", main = "Salaray cap versus wins", xlab = "Salary Cap", ylab = "Wins")
+abline(lm(Records$W~Records$CAP), col="red") # regression line (y~x)
 
-
+count = c()
+for(team in 1:nrow(Records)){
+  count <- c(count, (sum(hockeystats$Salary > 6000000 & Records[team,"ABREV"] == hockeystats$Team)))
+}
+counts = round(count, 0)
+Records$Stars = counts
+plot(Records$Stars, Records$W, pch = 16, cex = 1.3, col = "blue", main = "Salaray cap versus wins", xlab = "Salary Cap", ylab = "Wins")
+model1 = lm(Records$W~Records$CAP)
+model2 = lm(W~CAP + Stars, Records)
+summary(model1)
+summary(model2)
