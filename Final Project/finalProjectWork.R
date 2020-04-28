@@ -118,8 +118,7 @@ DftRdOvrl <- ggplot(hockeystats, aes(x= DftRd)) +
 
 # From this we can conclude that most of our numeric 
 
-
-# Visual 1
+# Height vs Salary Visual
 
 # Create a data frame with only the desired variables
 HtSalary1 <- hockeystats %>% select(Ht, Position, Salary)
@@ -127,7 +126,8 @@ HtSalary1 <- hockeystats %>% select(Ht, Position, Salary)
 # Assign a new varaible identifying all the Offesive and Defensive position types
 HtSalary1 <- HtSalary1 %>%
   mutate(Pos = ifelse(Position != "D", "Offensive Player",
-                    ifelse(Position == "D", "Defensive Player", NA)))
+                      ifelse(Position == "D", "Defensive Player", NA)))
+HtSalary1 <- HtSalary1 %>% filter(Ht < 80)
 
 # Group by Height and Position while summarising average salary in millions
 HtSalary = HtSalary1 %>% 
@@ -135,81 +135,67 @@ HtSalary = HtSalary1 %>%
   summarise(AvgSalaryInMillions = mean(Salary)/1000000)
 
 # Create a bar plot with the Height and Average Salary variables
+HtSalaryPlott <- ggplot(data=HtSalary, aes(x=Ht, y=AvgSalaryInMillions)) + 
+  labs(x='Player Height (Inches)', y='Average Salary (Millions)', title="Average Salary by Player Height") +
+  theme_minimal()+
+  theme(axis.ticks=element_blank(), legend.position = 'top') +
+  facet_wrap(~Pos)+
+  geom_line(stat='identity', color="steelblue", xlim(65,80), width(.9))
 HtSalaryPlot <- ggplot(
   data=HtSalary, # data object 
-  aes(
-    x=Ht, # x aesthetic 
-    y=AvgSalaryInMillions, # y aesthetic
-  )
-) + 
-  labs(
-    x='Player Height(Inches)',
-    y='Average Salary (Millions)',
-    title="Average Salary by Player Height"
-  ) +
+  aes(x=Ht, y=AvgSalaryInMillions)) + 
+  labs(x='Player Height (Inches)', y='Average Salary (Millions)', title="Average Salary by Player Height") +
   theme_minimal()+
-  theme(
-    axis.ticks=element_blank(),
-    legend.position = 'top') +
-  facet_wrap(~Pos) +
-  geom_bar(stat='identity', fill="steelblue")
+  facet_wrap(~Pos)+
+  theme(axis.ticks=element_blank(), legend.position = 'top') +
+  geom_line(stat='identity', color="steelblue")
+
 HtSalaryPlot
 
-# Visual 2
+# Age vs Salary Visual
 
 #Create a data frame with only the desired variables
 AgeSalary <- hockeystats %>% select(Salary, Born)
 
 #Add a Age variable calculated from the birth date variable
-AgeSalary$Born <- as.Date(AgeSalary$Born)
-AgeSalary$Age <- age_calc(AgeSalary$Born, enddate = Sys.Date(), units = "years", precise = TRUE)
-AgeSalary$Age <- (AgeSalary$Age-1900)
+AgeSalary$Age <- difftime(Sys.Date(), AgeSalary$Born, unit = "weeks")
+AgeSalary$Age <- AgeSalary$Age/52.25
 AgeSalary$Age <- round(AgeSalary$Age, 0)
-AgeSalary <- AgeSalary %>% filter(Age < 75)
-
+AgeSalary$Age <- as.numeric(AgeSalary$Age)
+AgeSalary$Age <- ifelse(AgeSalary$Age >= 2000, AgeSalary$Age-2000, AgeSalary$Age-1900)
 
 #Group the data by age and summarise by average salary
 AgeSalary = AgeSalary %>% 
   group_by(Age) %>% 
   summarise(AvgSalaryInMillions = mean(Salary)/1000000)
 
-
 #Create a line plot with the age and average salary variables
+
 AgeSalaryPlot <- ggplot(
   data=AgeSalary, # data object 
-  aes(
-    x=Age, # x aesthetic 
-    y=AvgSalaryInMillions, # y aesthetic
-  )
-) + 
-  labs(
-    x='Player Age(Years)',
-    y='Average Salary (Millions)',
-    title="Average Salary by Player Age"
-  ) +
+  aes(x=Age, y=AvgSalaryInMillions)) + 
+  labs(x='Player Age', y='Average Salary (Millions)', title="Average Salary by Player Age") +
   theme_minimal()+
-  theme(
-    axis.ticks=element_blank(),
-    legend.position = 'top') +
+  theme(axis.ticks=element_blank(), legend.position = 'top') +
   geom_line(stat='identity', color="steelblue")
+
 AgeSalaryPlot
 
-## Visual 3
+# Player Nationality vs Salary Visual
 
-CntrySalary <- hockeystats %>% select(Cntry, Salary)
+CntrySalary <- hockeystats %>% select(Nat, Salary)
+CntrySalary <- CntrySalary %>% filter(CntrySalary$Nat != 'SVN')
 CntrySalary <- CntrySalary %>%
-  group_by(Cntry) %>%
-  summarise(Salary = mean(Salary)/1000000)
+  group_by(Nat) %>%
+  summarise(Salary = mean(Salary))
 
-CntrySalaryPlot<-ggplot(data=CntrySalary, aes(x=Cntry, y=Salary)) +
-  geom_bar(stat="identity", color="steelblue", width = .8) +
-  labs(
-    x='Players Country',
-    y='Average Salary (Millions)',
-    title="Average Salary by Country") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1),
-        axis.ticks=element_blank())
+CntrySalaryPlot<-ggplot(data=CntrySalary, aes(x=Nat, y=Salary)) +
+  geom_bar(stat="identity", color="steelblue", fill="steelblue", width = .8) +
+  labs(x='Players Nationality', y='Average Salary', title="Average Salary by Player Nationality") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), axis.ticks=element_blank())
+
 CntrySalaryPlot
+
 
 # Functions for later RMSE testing 
 rmse = function(actual, predicted) {
