@@ -283,7 +283,7 @@ predict6 <- predict(best_elastic_regression, stat_tst)
 rmse(stat_trn$Salary, predict5)
 rmse(stat_tst$Salary, predict6)
 
-plot(Records$CAP, Records$W, pch = 16, cex = 1.3, col = "blue", main = "Salaray cap versus wins", xlab = "Salary Cap", ylab = "Wins")
+plot(Records$CAP, Records$W, pch = 16, cex = 1.3, col = "blue", main = "Salary cap versus wins", xlab = "Salary Cap", ylab = "Wins")
 abline(lm(Records$W~Records$CAP), col="red") # regression line (y~x)
 
 count = c()
@@ -294,9 +294,15 @@ counts = round(count, 0)
 Records$Stars = counts
 plot(Records$Stars, Records$W, pch = 16, cex = 1.3, col = "blue", main = "Salaray cap versus wins", xlab = "Salary Cap", ylab = "Wins")
 model1 = lm(Records$W~Records$CAP)
-model2 = lm(W~CAP + Stars, Records)
+model2 = lm(W~CAP + Stars + , Records)
 summary(model1)
 summary(model2)
+
+
+
+
+
+
 
 # Calculate residuals on test data and create a dataframe with the two
 residuals <- stat_tst$Salary - predict6
